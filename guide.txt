@@ -1,0 +1,20 @@
+Going to just write some basic operational notes. More instructions incoming.
+
+
+====================================================================
+Ops/tech stack
+
+Making this basic decision, because
+  - Going to go with bare machines, because I know this better, and then a combination
+    of GCP//flask//postgres//react.  The point of all this is to optimize for speed of deployment.
+
+
+====================================================================
+
+Style
+Naming:
+- Class names: CapitalizedNames like this
+- Class variables: underscore_naming is best, because parsing longer names (esp with numbers) is tough.
+- Local variables: camelCase is ok. It's faster.
+
+I'm going to try and adhere to these myself, but I'll probably break them too.
