@@ -1,6 +1,7 @@
 """
 Some accessible functions for dealing with our db. This separation of ideas is easier for me to deal with.
 
+TODO: test all of this. Don't be a fool.
 
 """
 
@@ -160,18 +161,66 @@ def get_restaurant(restaurantId):
 # Connectors.
 
 # Cool, now we're doing per-user dishes.
-def get_dishes_for_user(userId):
-    pass
+
+# This should return a list of dish objects.
+def get_dishes_for_user(userId='', displayName=''):
+    # Easier if we have displayname, at some point might just have
+    # their uid tho. Let's start by assuming userId.
+
+    # TODO: test this.
+    with session_scope() as ss:
+        dishQuery = ss.query(Dish)
+        dishQuery = dishQuery.join(UserFaveDishes).filter(UserFaveDishes.userId==userId)
+        # DO some ordering? Maybe not now.
+        return dishQuery.all()
+
+    return []
+
+
+def get_faves_dish(userId, dishId):
+    with session_scope() as ss:
+        faveQuery = ss.query(UserFaveDishes)
+        faveQuery = faveQuery.filter(UserFaveDishes.userId==userId).filter(UserFaveDishes.dishId==dishId).first()
+        return faveQuery
+    return None
 
 # false means taking it out.
-def fave_dish(userId, dishId, isFave=True):
-    pass
+def set_fave_dish(userId, dishId, isFave=True):
+    # First, check if exists
+
+    existingFave = get_faves_dish(userId, dishId)
+    if isFave and existingFave:
+        # don't do anything if they already fave it.
+        return
+
+    if existingFave and (not isFave):
+        # We have to kill it.
+        with session_scope() as ss:
+            ss.query(UserFaveDishes).get(existingFave.id).delete()
+    else:
+        # Then we create a fave.
+        newFave = UserFaveDishes()
+        newFave.userId = userId
+        newFave.dishId = dishId
+        ss.add(newFave)
+        ss.flush()
 
 def get_dishes_for_restaurant(restaurantId):
-    pass
+
+    with session_scope() as ss:
+        dishQuery = ss.query(Dish).join(Restaurant).filter(Restaurant.id==restaurantId)
+        return dishQuery.all()
+    return []
 
 
-def get_local_influencers(lat, lon, milesRadius=5):
+def get_all_influencers():
+    with session_scope() as ss:
+        userQuery = ss.query(User).filter(User.isInfluencer==True).all()
+    return []
+
+def get_local_influencers(lat, lon, milesRadius=500):
+    # Uhh. I guess for now let's just return all the influencers?
+
     pass
 
 # Only get their dishes that are close to you.
