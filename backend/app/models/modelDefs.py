@@ -72,6 +72,7 @@ class User(ModelBase):
     # TODO: there should be some memory of delivery addresses and other things associated
     # to this person.
 
+    # TODO: photo management will soon be its own thing, we'll have to deal with it.
     # Path to their profile photo.
     avatarPath   = Column(String)
 
@@ -90,7 +91,54 @@ class User(ModelBase):
     stripe_id    = Column(String)
     # Potentially useless column, putting it here just in case.
     preferred_payout = Column(String)
-    pass
+
+    # Only update the things in the dict.
+    def populate_from_dict(self, userDict):
+
+        # Man, can this be templatized too? Probably could be, but let's do that at a
+        # later date. TODO.
+
+        # TODO: wrap this in a try/catch.
+
+        if 'firebaseId' in userDict:
+            self.firebaseId = userDict['firebaseId']
+        if 'email' in userDict:
+            self.email = userDict['email']
+        if 'displayName' in userDict:
+            self.displayName = userDict['displayName']
+        if 'firstName' in userDict:
+            self.firstName = userDict['firstName']
+        if 'lastName' in userDict:
+            self.lastName = userDict['lastName']
+        if 'phone' in userDict:
+            self.phone = userDict['phone']
+
+        if 'lastLat' in userDict:
+            self.lastLat = float(userDict['lastLat'])
+        if 'lastLon' in userDict:
+            self.lastLon = float(userDict['lastLon'])
+
+        if 'avatarPath' in userDict:
+            self.avatarPath = userDict['avatarPath']
+
+        if 'isInfluencer' in userDict:
+            self.isInfluencer = bool(userDict['isInfluencer'])
+
+        # The numposts, followers, reviews should probably be updated elsewhere.
+        # But oh well, single source of entry.
+        if 'numPosts' in userDict:
+            self.numPosts = userDict['numPosts']
+        if 'numFollowers' in userDict:
+            self.numFOllowers = userDict['numFollowers']
+        if 'numReviews' in userDict:
+            self.numReviews = userDict['numReviews']
+
+        if 'stripe_id' in userDict:
+            self.stripe_id = userDict['stripe_id']
+        if 'preferred_payout' in userDict:
+            self.preferred_payout = userDict['preferred_payout']
+
+        # Fin.
 
 # This is different from a post. This is more of a list of dishes that a normal user has
 # hearted or something.
@@ -140,7 +188,8 @@ class Dish(ModelBase):
 
     # Dishes will need some amount of scoring associated with them..
 
-
+    def populate_from_dict(self, userDict):
+        pass
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
