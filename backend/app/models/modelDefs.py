@@ -94,50 +94,50 @@ class User(ModelBase):
     preferred_payout = Column(String)
 
     # Only update the things in the dict.
-    def populate_from_dict(self, userDict):
-
+    # props is a dict.
+    def populate_from_dict(self, props):
         # Man, can this be templatized too? Probably could be, but let's do that at a
         # later date. TODO.
 
         # TODO: wrap this in a try/catch.
 
-        if 'firebase_id' in userDict:
-            self.firebase_id = userDict['firebase_id']
-        if 'email' in userDict:
-            self.email = userDict['email']
-        if 'display_name' in userDict:
-            self.display_name = userDict['display_name']
-        if 'first_name' in userDict:
-            self.first_name = userDict['first_name']
-        if 'last_name' in userDict:
-            self.last_name = userDict['last_name']
-        if 'phone' in userDict:
-            self.phone = userDict['phone']
+        if 'firebase_id' in props:
+            self.firebase_id = props['firebase_id']
+        if 'email' in props:
+            self.email = props['email']
+        if 'display_name' in props:
+            self.display_name = props['display_name']
+        if 'first_name' in props:
+            self.first_name = props['first_name']
+        if 'last_name' in props:
+            self.last_name = props['last_name']
+        if 'phone' in props:
+            self.phone = props['phone']
 
-        if 'last_lat' in userDict:
-            self.last_lat = float(userDict['last_lat'])
-        if 'last_lon' in userDict:
-            self.last_lon = float(userDict['last_lon'])
+        if 'last_lat' in props:
+            self.last_lat = float(props['last_lat'])
+        if 'last_lon' in props:
+            self.last_lon = float(props['last_lon'])
 
-        if 'avatar_path' in userDict:
-            self.avatar_path = userDict['avatar_path']
+        if 'avatar_path' in props:
+            self.avatar_path = props['avatar_path']
 
-        if 'is_influencer' in userDict:
-            self.is_influencer = bool(userDict['is_influencer'])
+        if 'is_influencer' in props:
+            self.is_influencer = bool(props['is_influencer'])
 
         # The numposts, followers, reviews should probably be updated elsewhere.
         # But oh well, single source of entry.
-        if 'num_posts' in userDict:
-            self.num_posts = userDict['num_posts']
-        if 'num_followers' in userDict:
-            self.num_followers = userDict['num_followers']
-        if 'num_reviews' in userDict:
-            self.num_reviews = userDict['num_reviews']
+        if 'num_posts' in props:
+            self.num_posts = props['num_posts']
+        if 'num_followers' in props:
+            self.num_followers = props['num_followers']
+        if 'num_reviews' in props:
+            self.num_reviews = props['num_reviews']
 
-        if 'stripe_id' in userDict:
-            self.stripe_id = userDict['stripe_id']
-        if 'preferred_payout' in userDict:
-            self.preferred_payout = userDict['preferred_payout']
+        if 'stripe_id' in props:
+            self.stripe_id = props['stripe_id']
+        if 'preferred_payout' in props:
+            self.preferred_payout = props['preferred_payout']
 
         # Fin.
 
@@ -189,8 +189,22 @@ class Dish(ModelBase):
 
     # Dishes will need some amount of scoring associated with them..
 
-    def populate_from_dict(self, userDict):
-        pass
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'restaurant_id' in props:
+            self.restaurant_id = props['restaurant_id']
+        if 'price' in props:
+            self.price = props['price']
+        if 'description' in props:
+            self.description = props['description']
+        if 'category' in props:
+            self.category = props['category']
+        if 'num_views' in props:
+            self.num_views = props['num_views']
+        if 'main_photo' in props:
+            self.main_photo = props['main_photo']
+        # OK.
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
@@ -243,7 +257,48 @@ class Restaurant(ModelBase):
 
     # TODO: probably need some fees in here.
 
-    pass
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'phone' in props:
+            self.phone = props['phone']
+        if 'email' in props:
+            self.email = props['email']
+        if 'delivery_options' in props:
+            self.delivery_options = props['delivery_options']
+        if 'pos_options' in props:
+            self.pos_options = props['pos_options']
+
+        if 'street_address' in props:
+            self.street_address = props['street_address']
+
+        if 'street_number' in props:
+            self.street_number = props['street_number']
+        if 'route' in props:
+            self.route = props['route']
+        if 'extra_address_id' in props:
+            self.extra_address_id = props['extra_address_id']
+        if 'city' in props:
+            self.city = props['city']
+        if 'state' in props:
+            self.state = props['state']
+        if 'country' in props:
+            self.country = props['country']
+        if 'zip_code' in props:
+            self.zip_code = props['zip_code']
+
+        if 'lat' in props:
+            self.lat = props['lat']
+        if 'lon' in props:
+            self.lon = props['lon']
+
+        if 'num_hearts' in props:
+            self.num_hearts = props['num_hearts']
+
+        if 'category' in props:
+            self.category = props['category']
+
+
 
 # A single order.
 class Order(ModelBase):
@@ -276,7 +331,7 @@ class Order(ModelBase):
     influencers_cut = Column(Float)
     restaurant_payout = Column(Float)
 
-    # Bunch of address fields.
+    # Bunch of address fields for delivering.
     street_number = Column(String)
     route = Column(String)
     extra_address_id = Column(String)
@@ -288,6 +343,56 @@ class Order(ModelBase):
 
     # One of a few states, we'll have to figure this out.
     delivery_state = Column(String)
+
+    def populate_from_dict(self, props):
+        if 'source_influencer' in props:
+            self.source_influencer = props['source_influencer']
+        if 'restaurant_id' in props:
+            self.restaurant_id = props['restaurant_id']
+        if 'orderer_email' in props:
+            self.orderer_email = props['orderer_email']
+        if 'orderer_phone' in props:
+            self.orderer_phone = props['orderer_phone']
+        if 'dish_ids' in props:
+            self.dish_ids = props['dish_ids']
+        if 'dishes_stringified' in props:
+            self.dishes_stringified = props['dishes_stringified']
+        if 'subtotal' in props:
+            self.subtotal = float(props['subtotal'])
+        if 'taxes' in props:
+            self.taxes = float(props['taxes'])
+        if 'delivery_fee' in props:
+            self.delivery_fee = float(props['delivery_fee'])
+        if 'tip' in props:
+            self.tip = float(props['tip'])
+        if 'total_cost' in props:
+            self.total_cost = float(props['total_cost'])
+        if 'our_cut' in props:
+            self.our_cut = float(props['our_cut'])
+        if 'influencers_cut' in props:
+            self.influencers_cut = float(props['influencers_cut'])
+        if 'restaurant_payout' in props:
+            self.restaurants_cut = float(props['restaurant_payout'])
+
+        if 'street_number' in props:
+            self.street_number = props['street_number']
+        if 'route' in props:
+            self.route = props['route']
+        if 'extra_address_id' in props:
+            self.extra_address_id = props['extra_address_id']
+        if 'city' in props:
+            self.city = props['city']
+        if 'state' in props:
+            self.state = props['state']
+        if 'zip_code' in props:
+            self.zip_code = props['zip_code']
+
+        if 'delivery_notes' in props:
+            self.delivery_notes = props['delivery_notes']
+        if 'delivery_state' in props:
+            self.delivery_state = props['delivery_state']
+
+
 
 
 # TODO: do this.
@@ -313,6 +418,7 @@ class Order(ModelBase):
 #class Tag(ModelBase):
 #    pass
 
+# Deal with this later.
 # These are usually payouts.
 class UserTransaction(ModelBase):
     __tablename__ = 'usertransactions'
@@ -339,7 +445,7 @@ class UserTransaction(ModelBase):
     notes  = Column(String)
 
 
-
+# Deal with this later.
 class RestaurantTransactions(ModelBase):
     __tablename__ = 'restauranttransactions'
     id = Column(Integer, primary_key=True)
