@@ -141,6 +141,25 @@ class User(ModelBase):
 
         # Fin.
 
+    # returns a 2-tuple (bool, str)
+    def validate(self):
+        if not self.email:
+            return (False, "Every user needs an email")
+        # TODO: check that email is valid.
+
+        if not self.display_name:
+            return (False, "Every user needs a handle")
+
+        # At some point, can just have a last name.
+        if (not self.first_name) or (not self.last_name):
+            return (False, "Person needs a name.")
+
+        if not self.phone:
+            return (False, "User needs a phone number so we can do validation")
+
+        # Yay, this is the best.
+        return (True, "")
+
 # This is different from a post. This is more of a list of dishes that a normal user has
 # hearted or something.
 class UserFaveDishes(ModelBase):
@@ -204,7 +223,18 @@ class Dish(ModelBase):
             self.num_views = props['num_views']
         if 'main_photo' in props:
             self.main_photo = props['main_photo']
-        # OK.
+
+    def validate(self):
+        if (not self.name):
+            return (False, "Every dish needs a name")
+
+        if (not self.restaurant_id):
+            return (False, "Every dish needs to be at a restaurant")
+
+        if self.price <= 0:
+            return (False, "Dish {} price {} must be positive".format(self.id, self.price))
+
+        return (True, "")
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
@@ -298,7 +328,15 @@ class Restaurant(ModelBase):
         if 'category' in props:
             self.category = props['category']
 
+    # Returns a 2-tuple (bool, message)
+    def validate(self):
+        if (not self.name) or (not self.phone) or not (self.email):
+            return (False, "Crucial info is missing: name {} email {} phone {} must all be filled".format(self.name, self.email, self.phone))
 
+        if (not self.delivery_options) or (not self.pos_options):
+            return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
+
+        return (True, "")
 
 # A single order.
 class Order(ModelBase):
@@ -392,7 +430,9 @@ class Order(ModelBase):
         if 'delivery_state' in props:
             self.delivery_state = props['delivery_state']
 
-
+    def validate(self):
+        # This doesn't need to be a big deal... so let's keep it simple for now.
+        return (True, "")
 
 
 # TODO: do this.
