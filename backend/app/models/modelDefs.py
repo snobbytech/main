@@ -113,7 +113,6 @@ class UserFaveRestaurants(ModelBase):
     userId = Column(UUID(as_uuid=True), ForeignKey('users.id'))
     restaurantId = Column(Integer, ForeignKey('restaurants.id'))
 
-
 # Different dishes at different restaurants.
 class Dish(ModelBase):
 
@@ -157,6 +156,8 @@ class Restaurant(ModelBase):
     # eg. UberEats, DoorDash.
     # For now, let's keep this as the stringification of a list? shrug emoji.
     deliveryOptions = Column(String)
+
+    # Introducing a
 
     # eg. Toast
     posOptions = Column(String)
