@@ -31,6 +31,7 @@ def to_public_dict(modelbaseInstance):
     today = datetime.now()
     dictRep = {}
     publicFields = modelbaseInstance.public_fields()
+
     for key in modelbaseInstance.__dict__:
         if key in publicFields:
             if key == 'id':
@@ -50,42 +51,42 @@ class User(ModelBase):
 
     # This we need. I guess it doesn't need to be set at the start though, we can just
     # set it for them.
-    firebaseId  = Column(String, unique=True)
+    firebase_id  = Column(String, unique=True)
 
     # We should have the actual email for all of these folks.
     email       = Column(String, unique=True)
 
     # This is more like their handle and url.
-    displayName = Column(String)
-    firstName   = Column(String)
-    lastName    = Column(String)
+    display_name = Column(String)
+    first_name   = Column(String)
+    last_name    = Column(String)
 
     # Can't have multiple phones...
     phone     = Column(String, unique=True)
 
     # My old code used to roll its own security, for now let's just use firebase.
     # This is just to
-    lastLat  = Column(Float)
-    lastLon  = Column(Float)
-    lastZip  = Column(String)
+    last_lat  = Column(Float)
+    last_lon  = Column(Float)
+    last_zip  = Column(String)
 
     # TODO: there should be some memory of delivery addresses and other things associated
     # to this person.
 
     # TODO: photo management will soon be its own thing, we'll have to deal with it.
     # Path to their profile photo.
-    avatarPath   = Column(String)
+    avatar_path   = Column(String)
 
     # This is
-    isInfluencer = Column(Boolean, default=False)
+    is_influencer = Column(Boolean, default=False)
 
     # Influencer-specific fields.
-    numPosts     = Column(Integer, default=0)
-    numFollowers = Column(Integer, default=0)
+    num_posts     = Column(Integer, default=0)
+    num_followers = Column(Integer, default=0)
 
     # Is this different than #posts in a significant way? I don't know yet but let's
     # leave it in for now. We can remove later.
-    numReviews   = Column(Integer, default=0)
+    num_reviews   = Column(Integer, default=0)
 
     # This is used for payouts and stuff.
     stripe_id    = Column(String)
@@ -100,38 +101,38 @@ class User(ModelBase):
 
         # TODO: wrap this in a try/catch.
 
-        if 'firebaseId' in userDict:
-            self.firebaseId = userDict['firebaseId']
+        if 'firebase_id' in userDict:
+            self.firebase_id = userDict['firebase_id']
         if 'email' in userDict:
             self.email = userDict['email']
-        if 'displayName' in userDict:
-            self.displayName = userDict['displayName']
-        if 'firstName' in userDict:
-            self.firstName = userDict['firstName']
-        if 'lastName' in userDict:
-            self.lastName = userDict['lastName']
+        if 'display_name' in userDict:
+            self.display_name = userDict['display_name']
+        if 'first_name' in userDict:
+            self.first_name = userDict['first_name']
+        if 'last_name' in userDict:
+            self.last_name = userDict['last_name']
         if 'phone' in userDict:
             self.phone = userDict['phone']
 
-        if 'lastLat' in userDict:
-            self.lastLat = float(userDict['lastLat'])
-        if 'lastLon' in userDict:
-            self.lastLon = float(userDict['lastLon'])
+        if 'last_lat' in userDict:
+            self.last_lat = float(userDict['last_lat'])
+        if 'last_lon' in userDict:
+            self.last_lon = float(userDict['last_lon'])
 
-        if 'avatarPath' in userDict:
-            self.avatarPath = userDict['avatarPath']
+        if 'avatar_path' in userDict:
+            self.avatar_path = userDict['avatar_path']
 
-        if 'isInfluencer' in userDict:
-            self.isInfluencer = bool(userDict['isInfluencer'])
+        if 'is_influencer' in userDict:
+            self.is_influencer = bool(userDict['is_influencer'])
 
         # The numposts, followers, reviews should probably be updated elsewhere.
         # But oh well, single source of entry.
-        if 'numPosts' in userDict:
-            self.numPosts = userDict['numPosts']
-        if 'numFollowers' in userDict:
-            self.numFOllowers = userDict['numFollowers']
-        if 'numReviews' in userDict:
-            self.numReviews = userDict['numReviews']
+        if 'num_posts' in userDict:
+            self.num_posts = userDict['num_posts']
+        if 'num_followers' in userDict:
+            self.num_followers = userDict['num_followers']
+        if 'num_reviews' in userDict:
+            self.num_reviews = userDict['num_reviews']
 
         if 'stripe_id' in userDict:
             self.stripe_id = userDict['stripe_id']
@@ -145,10 +146,10 @@ class User(ModelBase):
 class UserFaveDishes(ModelBase):
     __tablename__ = 'userfavedishes'
     id = Column(Integer, primary_key=True)
-    userId = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
     # I can probably include a backref here, but I don't really want to look it up right now?
 
-    dishId = Column(Integer, ForeignKey('dishes.id'))
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
 
     # Is there more stuff we need? I don't think so?
     pass
@@ -158,8 +159,8 @@ class UserFaveRestaurants(ModelBase):
     __tablename__ = 'userfaverestaurants'
 
     id = Column(Integer, primary_key=True)
-    userId = Column(UUID(as_uuid=True), ForeignKey('users.id'))
-    restaurantId = Column(Integer, ForeignKey('restaurants.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
 # Different dishes at different restaurants.
 class Dish(ModelBase):
@@ -170,7 +171,7 @@ class Dish(ModelBase):
 
     # Readable name.
     name = Column(String)
-    restaurantId = Column(Integer, ForeignKey('restaurants.id'))
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
     # Maybe better in integers?
     price = Column(Float)
@@ -179,12 +180,12 @@ class Dish(ModelBase):
     # This might end up needing to be a collection, versus a string.
     category = Column(String)
 
-    numViews = Column(Integer)
+    num_views = Column(Integer)
     # Needs to match with a hearts table, but easier to keep it stored locally.
-    numHearts = Column(Integer, default=0)
+    num_hearts = Column(Integer, default=0)
     # Path to the main photo.
     # This cannot be empty.
-    mainPhoto = Column(String)
+    main_photo = Column(String)
 
     # Dishes will need some amount of scoring associated with them..
 
@@ -204,19 +205,19 @@ class Restaurant(ModelBase):
 
     # eg. UberEats, DoorDash.
     # For now, let's keep this as the stringification of a list? shrug emoji.
-    deliveryOptions = Column(String)
+    delivery_options = Column(String)
 
     # Introducing a
 
     # eg. Toast
-    posOptions = Column(String)
+    pos_options = Column(String)
 
     # Full address string.
-    streetAddress = Column(String)
+    street_address = Column(String)
 
     # More in-depth address lines.
     # Grabbed from https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-address
-    streetNumber = Column(String)
+    street_number = Column(String)
     route         = Column(String)
     # eg. apartment no.
     extra_address_id = Column(String)
@@ -234,7 +235,7 @@ class Restaurant(ModelBase):
     lon = Column(Float)
 
     # Just something to expedite.
-    numHearts = Column(Integer, default=0)
+    num_hearts = Column(Integer, default=0)
     # Needs to be changed eventually.
     category  = Column(String)
 
@@ -333,7 +334,7 @@ class UserTransaction(ModelBase):
     status = Column(String)
 
     # More useful name for them.
-    transactionType = Column(String)
+    transaction_type = Column(String)
     #
     notes  = Column(String)
 

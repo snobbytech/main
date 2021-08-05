@@ -51,7 +51,7 @@ def add_user(userDict):
 def mod_user(userDict):
     user = None
     if 'id' in userDict and userDict['id']:
-        user = get_user(userId=userDict['id'])
+        user = get_user(user_id=userDict['id'])
     else:
         user = get_user(email=userDict['email'])
 
@@ -170,7 +170,7 @@ def get_dishes_for_user(userId='', displayName=''):
     # TODO: test this.
     with session_scope() as ss:
         dishQuery = ss.query(Dish)
-        dishQuery = dishQuery.join(UserFaveDishes).filter(UserFaveDishes.userId==userId)
+        dishQuery = dishQuery.join(UserFaveDishes).filter(UserFaveDishes.user_id==userId)
         # DO some ordering? Maybe not now.
         return dishQuery.all()
 
@@ -180,7 +180,7 @@ def get_dishes_for_user(userId='', displayName=''):
 def get_faves_dish(userId, dishId):
     with session_scope() as ss:
         faveQuery = ss.query(UserFaveDishes)
-        faveQuery = faveQuery.filter(UserFaveDishes.userId==userId).filter(UserFaveDishes.dishId==dishId).first()
+        faveQuery = faveQuery.filter(UserFaveDishes.user_id==userId).filter(UserFaveDishes.dish_id==dishId).first()
         return faveQuery
     return None
 
