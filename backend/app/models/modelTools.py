@@ -5,7 +5,7 @@ TODO: test all of this. Don't be a fool.
 
 """
 
-from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserTransaction, RestaurantTransaction
+from .modelDefs import to_public_dict, User, Dish, Restaurant, Order
 from .modelSetup import session_scope, con, dropAllTables
 from . import modelBase
 
