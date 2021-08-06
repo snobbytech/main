@@ -182,6 +182,10 @@ class UserFaveRestaurants(ModelBase):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
 # Different dishes at different restaurants.
+
+# TODO (important): allow for dish modifications. Stuff like,
+# add an egg, what sauce, etc. Basically need a way for this to be easily
+# done for the restaurant
 class Dish(ModelBase):
 
     __tablename__ = 'dishes'
