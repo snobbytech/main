@@ -16,7 +16,7 @@ import json
 import os
 import random
 from sqlalchemy import func, inspect, or_, and_
-from sqlalchemy.orm import joinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.dialects.postgresql import UUID
 
 

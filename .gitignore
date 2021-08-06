@@ -1,5 +1,7 @@
 # Flask Stuff
+
 instance/
+config/
 
 # gunicorn logs
 logs/

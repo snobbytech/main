@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 os.environ['APP_CONFIG_FILE'] = '../config/dev.py'
 
-#from app import app
+from app import flask_app
 from app.models import modelTools as mt
 from app.models.modelDefs import to_public_dict
 
