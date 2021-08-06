@@ -18,14 +18,14 @@ from contextlib import contextmanager
 # TODO: figure out if I can decouple app from the models here.
 
 # might need this diff
-from app import app
+from app import flask_app
 
 def connect():
     url = "postgresql://{}:{}@{}:{}/{}"
 
     # All right, this is tough. But oh well.
-    url = url.format(app.config['DB_USERNAME'], app.config['DB_PASSWORD'],
-                     app.config['DB_HOST'], app.config['DB_PORT'], app.config['DB_DBNAME'])
+    url = url.format(flask_app.config['DB_USERNAME'], flask_app.config['DB_PASSWORD'],
+                     flask_app.config['DB_HOST'], flask_app.config['DB_PORT'], flask_app.config['DB_DBNAME'])
     connection = sqlalchemy.create_engine(url, client_encoding='utf8')
 
     # Bind this to metadata.
@@ -39,8 +39,8 @@ Session = sessionmaker(bind=con)
 
 def dropAllTables():
     url = "postgresql://{}:{}@{}:{}/{}"
-    url = url.format(app.config['DB_USERNAME'], app.config['DB_PASSWORD'],
-                     app.config['DB_HOST'], app.config['DB_PORT'], app.config['DB_DBNAME'])
+    url = url.format(flask_app.config['DB_USERNAME'], flask_app.config['DB_PASSWORD'],
+                     flask_app.config['DB_HOST'], flask_app.config['DB_PORT'], flask_app.config['DB_DBNAME'])
     engine = sqlalchemy.create_engine(url)
     myMeta = sqlalchemy.MetaData(url)
     myMeta.reflect()

@@ -5,7 +5,7 @@ TODO: test all of this. Don't be a fool.
 
 """
 
-from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserTransaction, RestaurantTransaction
+from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserFaveDishes
 from .modelSetup import session_scope, con, dropAllTables
 from . import modelBase
 
@@ -16,7 +16,7 @@ import json
 import os
 import random
 from sqlalchemy import func, inspect, or_, and_
-from sqlalchemy.orm import joinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.dialects.postgresql import UUID
 
 
@@ -35,11 +35,11 @@ def recreate_tables():
 def add_user(userDict):
     newUser = User()
     newUser.populate_from_dict(userDict)
-    valid, msg = newUser.validate():
+    valid, msg = newUser.validate()
     if valid:
         # Add it to the db.
         with session_scope() as ss:
-            ss.add(newNuser)
+            ss.add(newUser)
             ss.flush()
         return newUser
 
@@ -87,8 +87,8 @@ def get_user(userId=None, email=''):
 # I think, same thing as before.
 def add_dish(dishDict):
     newDish = Dish()
-    newDIsh.populate_from_dict(dishDict)
-    valid, msg = newDict.validate()
+    newDish.populate_from_dict(dishDict)
+    valid, msg = newDish.validate()
     if valid:
         with session_scope() as ss:
             ss.add(newDish)
@@ -200,10 +200,11 @@ def set_fave_dish(userId, dishId, isFave=True):
     else:
         # Then we create a fave.
         newFave = UserFaveDishes()
-        newFave.userId = userId
-        newFave.dishId = dishId
-        ss.add(newFave)
-        ss.flush()
+        newFave.user_id = userId
+        newFave.dish_id = dishId
+        with session_scope() as ss:
+            ss.add(newFave)
+            ss.flush()
 
 def get_dishes_for_restaurant(restaurantId):
 

@@ -8,7 +8,7 @@ import re
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
-from time improt time
+from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Maybe timetools
@@ -182,6 +182,10 @@ class UserFaveRestaurants(ModelBase):
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
 # Different dishes at different restaurants.
+
+# TODO (important): allow for dish modifications. Stuff like,
+# add an egg, what sauce, etc. Basically need a way for this to be easily
+# done for the restaurant
 class Dish(ModelBase):
 
     __tablename__ = 'dishes'
@@ -214,7 +218,7 @@ class Dish(ModelBase):
         if 'restaurant_id' in props:
             self.restaurant_id = props['restaurant_id']
         if 'price' in props:
-            self.price = props['price']
+            self.price = float(props['price'])
         if 'description' in props:
             self.description = props['description']
         if 'category' in props:
@@ -345,7 +349,7 @@ class Order(ModelBase):
 
     # If this order was generated from an influencer, we need to
     # attribute them.
-    source_influencer = Column(Integer, ForeignKey('users.id'))
+    source_influencer = Column(UUID(as_uuid=True), ForeignKey('users.id'))
     restaurant_id     = Column(Integer, ForeignKey('restaurants.id'))
 
     # Right now, we're not creating users for order-ers, so we're storing these for
