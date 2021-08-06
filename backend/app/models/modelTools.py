@@ -202,8 +202,9 @@ def set_fave_dish(userId, dishId, isFave=True):
         newFave = UserFaveDishes()
         newFave.userId = userId
         newFave.dishId = dishId
-        ss.add(newFave)
-        ss.flush()
+        with session_scope() as ss:
+            ss.add(newFave)
+            ss.flush()
 
 def get_dishes_for_restaurant(restaurantId):
 
