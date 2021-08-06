@@ -1,0 +1,26 @@
+# Flask Stuff
+instance/
+
+# gunicorn logs
+logs/
+
+sendgrid.env
+
+*code-workspace
+*~
+*.pyc
+*pycache*
+*.swp
+env
+.vscode
+
+# Dev Stuff
+*.sublime-workspace
+
+node_modules/
+dist/
+# I'm guessing this just gets made by npm or some ish.
+package-lock.json
+
+# I guess we shouldn't commit npm build dirs?
+build/
