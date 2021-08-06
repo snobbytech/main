@@ -32,7 +32,7 @@ from app.models.modelDefs import to_public_dict
 # Each is a list of prop dicts.
 # FYI, this is janky af and assumes that we dont have name collisions and stuff.
 # I think we can live with that for now.
-def populate_db_action(users, restaurants, dishes, userfaves):
+def populate_db_action(users, restaurants, dishes, userFaves):
 
     # Add the influencers.
     new_users = []
@@ -56,7 +56,7 @@ def populate_db_action(users, restaurants, dishes, userfaves):
                 the_restaurant = one_rest
 
         # Have to store the restaurant name now.
-        dish['restaurant_id'] = the_restaurant
+        dish['restaurant_id'] = the_restaurant.id
 
         if the_restaurant is None:
             print("We made a mistake in naming a restaurant for {}".format(dish))
@@ -76,7 +76,7 @@ def populate_db_action(users, restaurants, dishes, userfaves):
             if one_user.display_name == userFave['user_display_name']:
                 the_user = one_user
         for one_dish in new_dishes:
-            if the_dish.name == userFave['dish_name']:
+            if one_dish.name == userFave['dish_name']:
                 the_dish = one_dish
 
         # Add a userfave with the corresponding ids.
