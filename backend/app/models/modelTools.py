@@ -200,8 +200,8 @@ def set_fave_dish(userId, dishId, isFave=True):
     else:
         # Then we create a fave.
         newFave = UserFaveDishes()
-        newFave.userId = userId
-        newFave.dishId = dishId
+        newFave.user_id = userId
+        newFave.dish_id = dishId
         with session_scope() as ss:
             ss.add(newFave)
             ss.flush()
