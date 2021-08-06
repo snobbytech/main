@@ -8,7 +8,7 @@ import re
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, Float, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
-from time improt time
+from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Maybe timetools

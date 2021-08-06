@@ -17,10 +17,15 @@ import sys
 
 # This is only going to work in dev mode right now.
 
+# This is the kind of bs I have to do to do relative imports.  Why? Because
+# guido sucks.  See this: https://mail.python.org/pipermail/python-3000/2007-April/006793.html
+# Anyway, this means I can then add like, ..models I guess
+sys.path.insert(0, os.path.abspath('..'))
+
 
 os.environ['APP_CONFIG_FILE'] = '../config/dev.py'
 
-from app import app
+#from app import app
 from app.models import modelTools as mt
 from app.models.modelDefs import to_public_dict
 

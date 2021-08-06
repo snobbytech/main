@@ -35,7 +35,7 @@ def recreate_tables():
 def add_user(userDict):
     newUser = User()
     newUser.populate_from_dict(userDict)
-    valid, msg = newUser.validate():
+    valid, msg = newUser.validate()
     if valid:
         # Add it to the db.
         with session_scope() as ss:

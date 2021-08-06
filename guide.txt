@@ -18,3 +18,25 @@ Naming:
 - Local variables: camelCase is ok. It's faster.
 
 I'm going to try and adhere to these myself, but I'll probably break them too.
+
+
+====================================================================
+Setting up the database.
+
+To do local testing on the database, I did this:
+
+# Start psql:
+sudo -u postgres psql
+
+# Inside psql:
+
+postgres=# create database foodsnob;
+CREATE DATABASE
+postgres=# create user snob with encrypted password 'delicious';
+CREATE ROLE
+postgres=# grant all privileges on database foodsnob to snob;
+GRANT
+
+I installed dbeaver as a gui to keep up with my database entries:
+  https://dbeaver.io/download/
+  and connect to it with either the username above.
