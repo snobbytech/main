@@ -39,7 +39,7 @@ def add_user(userDict):
     if valid:
         # Add it to the db.
         with session_scope() as ss:
-            ss.add(newNuser)
+            ss.add(newUser)
             ss.flush()
         return newUser
 
@@ -87,8 +87,8 @@ def get_user(userId=None, email=''):
 # I think, same thing as before.
 def add_dish(dishDict):
     newDish = Dish()
-    newDIsh.populate_from_dict(dishDict)
-    valid, msg = newDict.validate()
+    newDish.populate_from_dict(dishDict)
+    valid, msg = newDish.validate()
     if valid:
         with session_scope() as ss:
             ss.add(newDish)

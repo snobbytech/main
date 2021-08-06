@@ -285,9 +285,12 @@ def populate_dev():
         },
     ]
 
-
+    populate_db_action(users, restaurants, dishes, userfaves)
     pass
 
 
 # Always recreate the tables.
 mt.recreate_tables()
+
+# The fateful call...
+populate_dev()

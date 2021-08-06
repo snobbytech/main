@@ -218,7 +218,7 @@ class Dish(ModelBase):
         if 'restaurant_id' in props:
             self.restaurant_id = props['restaurant_id']
         if 'price' in props:
-            self.price = props['price']
+            self.price = float(props['price'])
         if 'description' in props:
             self.description = props['description']
         if 'category' in props:
