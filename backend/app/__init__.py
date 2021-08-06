@@ -28,3 +28,4 @@ flask_app.config.from_envvar('APP_CONFIG_FILE')
 
 # Load more options from the environment variable.
 #app.config.from_envvar('APP_CONFIG_FILE')
+from app import routes
