@@ -349,7 +349,7 @@ class Order(ModelBase):
 
     # If this order was generated from an influencer, we need to
     # attribute them.
-    source_influencer = Column(Integer, ForeignKey('users.id'))
+    source_influencer = Column(UUID(as_uuid=True), ForeignKey('users.id'))
     restaurant_id     = Column(Integer, ForeignKey('restaurants.id'))
 
     # Right now, we're not creating users for order-ers, so we're storing these for
