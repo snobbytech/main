@@ -72,12 +72,15 @@ def mod_user(userDict):
 def delete_user(userId):
     pass
 
-def get_user(userId=None, email=''):
+def get_user(userId=None, email='', display_name=''):
     with session_scope() as ss:
         if userId:
             return ss.query(User).get(userId)
         elif email:
             return ss.query(User).filter(User.email==email).first()
+        elif display_name:
+            return ss.query(User).filter(User.display_name==display_name).first()
+            pass
         # Failure mode.
         return None
 
