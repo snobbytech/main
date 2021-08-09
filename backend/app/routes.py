@@ -182,12 +182,12 @@ def get_dish_payment():
 
     # Basically we do a calculation of fees.
 
-# This grabs stuff like
-@flask_app.route("/finalize_dish_order", methods=['GET'])
+# This happens after the user pays. We grab the order and finalize it in our db.
+@flask_app.route("/finalize_create_order", methods=['GET'])
 def finalize_dish_order():
     pass
 
-# After the
+# We have to grab the order and return its values, no biggie.
 @flask_app.route("/get_order_status", methods=['GET'])
 def get_order_status():
     pass
