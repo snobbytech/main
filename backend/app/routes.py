@@ -73,20 +73,85 @@ def get_influencer_public():
 # Has option of restricting by location too.
 @flask_app.route("/get_influencer_dishes", methods=['GET'])
 def get_influencer_dishes():
-    pass
+
+    influencer_name = 'fionaeats365'
+    # Again, usually populated from request form.
+    dishes = mt.get_dishes_for_user(influencerName=influencer_name)
+
+    all_dishes = []
+    for one_dish in dishes:
+        all_dishes.append(to_public_dict(one_dish))
+    return jsonify(all_dishes)
+
+
+@flask_app.route("/get_influencer_dishes_area", methods=['GET'])
+def get_influencer_dishes_area():
+    influencer_name = 'fionaeats365'
+    # in miles.
+    radius = '5'
+    zipCode = '10011'
+
+    latlons = tools.decode_zip(zipCode)
+    influencer = mt.get_user(display_name=influencer_name)
+    local_dishes = mt.get_influencer_local_dishes(userId=influencer.id,
+                                                  lat=latlons['lat'],
+                                                  lon=latlons['lon'],
+                                                  milesRadius=5)
+
+    # We should probably get the restaurants too? Maybe in teh future at least.
+    all_dishes = []
+    for one_dish in local_dishes:
+        all_dishes.append(to_public_dict(one_dish))
+
+    return jsonify(all_dishes)
 
 
 @flask_app.route("/get_dish_info", methods=['GET'])
 def get_dish_info():
-    pass
+
+    # Pretty simple thing, eh?
+    dish_name = 'Fried Chicken and Waffles'
+    one_dish = mt.get_dish_with_name(dish_name)
+
+    # Uhh, I guess then I... do it?
+    if one_dish:
+        return jsonify(to_public_dict(one_dish))
+    return None
 
 @flask_app.route("/get_restaurant_info", methods=['GET'])
 def get_restaurant_info():
-    pass
+
+    restaurant_name = 'Cafeteria'
+    # Really, should be getting this from a restaurant_id or a name-and-internal thing
+    # or something.
+    the_restaurant = mt.get_restaurant_from_name(restaurant_name)
+
+    return jsonify(to_public_dict(the_restaurant))
+
 
 @flask_app.route("/get_restaurant_dishes", methods=['GET'])
 def get_restaurant_dishes():
+
+    pass
+
+# Initial go with the
+@flask_app.route("/get_dish_payment", methods=['GET'])
+def get_dish_payment():
+    pass
+
+# This grabs stuff like
+@flask_app.route("/finalize_dish_order", methods=['GET'])
+def finalize_dish_order():
+    pass
+
+# After the
+@flask_app.route("/get_order_status", methods=['GET'])
+def get_order_status():
     pass
 
 
-@flask_app.route("/
+# I'm guessing this is from some webhook or something, but basically after we
+# fulfill an order this needs to mark the order as DONE.
+@flask_app.route("/finalize_order", methods=['GET'])
+def finalize_order():
+    pass

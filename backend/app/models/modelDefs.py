@@ -246,6 +246,10 @@ class Restaurant(ModelBase):
     id = Column(Integer, primary_key=True)
 
     name = Column(String)
+
+    # We should be using this for url endpoints.
+    url_name = Column(String)
+
     # For contact.
     phone = Column(String)
     # Need this to send orders for now.
@@ -294,6 +298,8 @@ class Restaurant(ModelBase):
     def populate_from_dict(self, props):
         if 'name' in props:
             self.name = props['name']
+        if 'url_name' in props:
+            self.url_name = props['url_name']
         if 'phone' in props:
             self.phone = props['phone']
         if 'email' in props:

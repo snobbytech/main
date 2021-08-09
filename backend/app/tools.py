@@ -37,3 +37,23 @@ def decode_zip(zipCode):
 # again.  I trust you know how to do that, good sir.
 
 def get_bounding_latlons(lat, lon, dist_away_mils):
+        lat_offset = abs(dist_away_miles / 69.0)
+    lon_offset = abs(dist_away_miles / (69.0 * cos(radians(lat))))
+
+
+    lat_max = lat + lat_offset
+    lat_min = lat - lat_offset
+
+    lon_max = lon + lon_offset
+    lon_min = lon - lon_offset
+
+    # Bound them accordingly.  Latitudes cannot roll over, whereas longitudes can.
+    lat_max = min(lat_max, 90)
+    lat_min = max(lat_min, -90)
+
+    # Note that, because of how longitude is defined, that
+    # this is not going to be right if we are near the 180th meridien.
+    # But because this only goes through parts of the russian land bridge, antarctica,
+    # and fiji, I think we can punt this until we get big enough there.
+
+    return {'lat_max': lat_max, 'lat_min': lat_min, 'lon_max': lon_max, 'lon-lon_min}

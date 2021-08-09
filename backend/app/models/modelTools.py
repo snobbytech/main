@@ -122,10 +122,37 @@ def get_dish(dishId):
         return ss.query(Dish).get(dishId)
     return None
 
+def get_dish_with_name(dishName):
+    with session_scope() as ss:
+        return ss.query(Dish).filter(Dish.name==dishName).first()
+    return None
+
+def get_arbitrary_dish():
+    # Just a happy accident for instances where we need a dish to do testing on.
+    with session_scope() as ss:
+        return ss.query(Dish).first()
+    return None
+
 ###########################################################
 # Restaurants
 def add_restaurant(restaurantDict):
     newRestaurant = Restaurant()
+
+    # Check and perhaps update the urlname.
+    urlName = ''
+    if 'url_name' in restaurantDict:
+        # We have to give them a urlName.
+        # TODO: do deduping and ish. We'll need it done.
+        urlName = retaurantDict['name'].lower().split(' ').join('-')
+
+    # collision check.
+    existingRestaurant = get_restaurant_from_urlname(urlName)
+    if existingRestaurant:
+        print("Could not add restaurantDict because it already exists: {}".format(restaurantDict))
+
+    # Otherwise, we're good...
+    restaurantDict['url_name'] = urlName
+
     newRestaurant.populate_from_dict(restaurantDict)
     valid, msg = newRestaurant.validate()
     if valid:
@@ -159,6 +186,10 @@ def get_restaurant(restaurantId):
         return ss.query(Restaurant).get(restaurantId)
     return None
 
+def get_restaurant_from_urlname(urlName):
+    with session_scope() as ss:
+        return ss.query(Restaurant).filter(Restaurant.url_name==urlName).first()
+    return None
 
 ###########################################################
 # Connectors.
@@ -166,9 +197,15 @@ def get_restaurant(restaurantId):
 # Cool, now we're doing per-user dishes.
 
 # This should return a list of dish objects.
-def get_dishes_for_user(userId='', displayName=''):
+def get_dishes_for_user(userId='', influencerName=''):
     # Easier if we have displayname, at some point might just have
     # their uid tho. Let's start by assuming userId.
+
+
+    if not userId:
+        # Get the userId from the influencerName.
+        theUser = get_user(display_name=influencerName)
+        userId = theUser.id
 
     # TODO: test this.
     with session_scope() as ss:
