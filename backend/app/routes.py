@@ -132,12 +132,55 @@ def get_restaurant_info():
 @flask_app.route("/get_restaurant_dishes", methods=['GET'])
 def get_restaurant_dishes():
 
-    pass
+    restaurant_name = 'Cafeteria'
+    the_restaurant = mt.get_restaurant_from_name(restaurant_name)
 
-# Initial go with the
+    # Now get dishes
+    the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)
+    all_dishes = []
+    for one_dish in the_dishes:
+        all_dishes.append(to_public_dict(one_dish))
+
+    return jsonify(all_dishes)
+
+# Returns a dict...
 @flask_app.route("/get_dish_payment", methods=['GET'])
 def get_dish_payment():
-    pass
+
+    dish_name = 'Fried Chicken and Waffles'
+    the_dish = mt.get_dish_with_name(dish_name)
+
+
+    ret_dict = {}
+    ret_dict['subtotal'] = the_dish.price
+
+    # TODO SOON: get an actual tax calculator for the actual thing.
+    # Goign to take the worst case scenario for californian restaurants.
+    ret_dict['tax'] = the_dish.price *0.1025
+
+
+    # Let's assume this?
+    ret_dict['delivery'] = 7.00
+
+    # I guess we can make our own fees too.
+    ret_dict['our_fees'] = the_dish.price * 0.15
+
+    # TODO: let the user tip the restaurant
+    ret_dict['tip'] = 0.
+
+
+    # TODO: let the user tip the dasher.
+    ret_dict['dasher_tip'] = 0.
+
+
+    ret_dict['total'] = ret_dict['subtotal'] + ret_dict['tax'] + ret_dict['delivery'] + ret_dict['our_fees'] + ret_dict['tip'] + ret_dict['dasher_tip']
+
+
+    # OK, is it fair? I dont know.
+    return jsonify(ret_dict)
+
+
+    # Basically we do a calculation of fees.
 
 # This grabs stuff like
 @flask_app.route("/finalize_dish_order", methods=['GET'])
