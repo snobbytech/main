@@ -141,12 +141,12 @@ def add_restaurant(restaurantDict):
     # Check and perhaps update the urlname.
     urlName = ''
     if 'url_name' in restaurantDict:
+        urlName = restaurantDict['url_name']
+    else:
         # We have to give them a urlName.
-        # TODO: do deduping and ish. We'll need it done.
-        urlName = retaurantDict['name'].lower().split(' ').join('-')
+        urlName = '-'.join(restaurantDict['name'].lower().split(' '))
+    # TODO: do deduping and ish. We'll need it done.
 
-
-    print("The restaurant urlName is ", urlName)
     # collision check.
     existingRestaurant = get_restaurant_from_urlname(urlName)
     if existingRestaurant:
