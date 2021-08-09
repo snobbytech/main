@@ -90,7 +90,7 @@ def get_influencer_dishes():
 def get_influencer_dishes_area():
     influencer_name = 'fionaeats365'
     # in miles.
-    radius = '5'
+    radius = 50000
     zipCode = '10011'
 
     latlons = tools.decode_zip(zipCode)
@@ -98,7 +98,7 @@ def get_influencer_dishes_area():
     local_dishes = mt.get_influencer_local_dishes(userId=influencer.id,
                                                   lat=latlons['lat'],
                                                   lon=latlons['lon'],
-                                                  milesRadius=5)
+                                                  milesRadius=radius)
 
     # We should probably get the restaurants too? Maybe in teh future at least.
     all_dishes = []

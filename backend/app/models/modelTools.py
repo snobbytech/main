@@ -9,6 +9,7 @@ from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserFaveDi
 from .modelSetup import session_scope, con, dropAllTables
 from . import modelBase
 
+from app import tools
 
 from collections import defaultdict
 import datetime
@@ -269,7 +270,21 @@ def get_local_influencers(lat, lon, milesRadius=500):
 
 # Only get their dishes that are close to you.
 def get_influencer_local_dishes(userId, lat, lon, milesRadius=5):
-    pass
+    # Huh, I guess I never did implement this, huh. 
+
+    bounds = tools.get_bounding_latlons(lat, lon, milesRadius)
+
+    # Now we can make the request? 
+    with session_scope() as ss:
+        # Question... does this join... work? 
+        dishQuery = ss.query(Dish).join(UserFaveDishes).join(Restaurant).filter(UserFaveDishes.user_id==userId)
+        dishQuery = dishQuery.filter(Restaurant.lat <= bounds['lat_max'])
+        dishQuery = dishQuery.filter(Restaurant.lat >= bounds['lat_min'])
+        dishQuery = dishQuery.filter(Restaurant.lon <= bounds['lon_max'])
+        dishQuery = dishQuery.filter(Restaurant.lon >= bounds['lon_min'])
+        return dishQuery.all()
+    # OK, now return it...
+    return []
 
 def get_local_dishes(lat, lon, milesRadius=5):
     pass

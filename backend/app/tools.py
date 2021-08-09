@@ -36,7 +36,7 @@ def decode_zip(zipCode):
 # That gives you an angular measure, and then you need to turn it back into units of length
 # again.  I trust you know how to do that, good sir.
 
-def get_bounding_latlons(lat, lon, dist_away_mils):
+def get_bounding_latlons(lat, lon, dist_away_miles):
     lat_offset = abs(dist_away_miles / 69.0)
     lon_offset = abs(dist_away_miles / (69.0 * cos(radians(lat))))
 
