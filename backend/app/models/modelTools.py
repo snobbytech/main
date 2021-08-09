@@ -275,15 +275,35 @@ def get_local_dishes(lat, lon, milesRadius=5):
 # Initiate order
 
 def make_order(orderDict):
-    pass
+
+    newOrder = Order()
+    newOrder.populate_from_dict(orderDict)
+    valid, msg = newOrder.validate()
+    if valid:
+        with session_scope() as ss:
+            ss.add(newOrder)
+            ss.flush()
+        return newOrder
+    return None
 
 # What does this mean?
-def update_order(orderDict):
-    pass
+def update_order(orderId, orderDict):
 
-def finalize_order(orderDict):
-    pass
+    the_order = get_order(orderId)
+    if the_order:
+        the_order.populate_from_dict(orderDict)
+        valid, msg = the_order.validate()
+        if valid:
+            with session_scope() as ss:
+                ss.add(the_order)
+                ss.flush()
+            return the_order
+    return None
 
+def get_order(orderId):
+    with session_scope() as ss:
+        return ss.query(Order).get(orderId)
+    return None
 
 # Get all my orders.
 def get_users_orders(userId):

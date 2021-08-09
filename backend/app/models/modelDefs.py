@@ -373,6 +373,7 @@ class Order(ModelBase):
     taxes         = Column(Float)
     delivery_fee  = Column(Float)
     tip           = Column(Float)
+    dasher_tip    = Column(Float)
     total_cost    = Column(Float)
 
     our_cut       = Column(Float)
@@ -386,11 +387,17 @@ class Order(ModelBase):
     city = Column(String)
     state = Column(String)
     zip_code = Column(String)
-
     delivery_notes = Column(String)
 
     # One of a few states, we'll have to figure this out.
+    #ORDER_CREATED, RESTAURANT_PREP, OUT_FOR_DELIVERY, DELIVERED, REFUNDED
     delivery_state = Column(String)
+
+    # like the stripe payment id or something.
+    payment_id = ''
+
+    # eg. STRIPE, etc.
+    payment_method = ''
 
     def populate_from_dict(self, props):
         if 'source_influencer' in props:
@@ -407,16 +414,18 @@ class Order(ModelBase):
             self.dishes_stringified = props['dishes_stringified']
         if 'subtotal' in props:
             self.subtotal = float(props['subtotal'])
-        if 'taxes' in props:
-            self.taxes = float(props['taxes'])
+        if 'local_taxes' in props:
+            self.taxes = float(props['local_taxes'])
         if 'delivery_fee' in props:
             self.delivery_fee = float(props['delivery_fee'])
         if 'tip' in props:
             self.tip = float(props['tip'])
+        if 'dasher_tip' in props:
+            self.dasher_tip = float(props['tip'])
         if 'total_cost' in props:
             self.total_cost = float(props['total_cost'])
-        if 'our_cut' in props:
-            self.our_cut = float(props['our_cut'])
+        if 'our_fees' in props:
+            self.our_cut = float(props['our_fees'])
         if 'influencers_cut' in props:
             self.influencers_cut = float(props['influencers_cut'])
         if 'restaurant_payout' in props:
@@ -439,6 +448,11 @@ class Order(ModelBase):
             self.delivery_notes = props['delivery_notes']
         if 'delivery_state' in props:
             self.delivery_state = props['delivery_state']
+
+        if 'payment_id' in props:
+            self.payment_id = props['payment_id']
+        if 'payment_method' in props:
+            self.payment_method = props['payment_method']
 
     def validate(self):
         # This doesn't need to be a big deal... so let's keep it simple for now.
