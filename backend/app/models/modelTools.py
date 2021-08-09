@@ -145,9 +145,12 @@ def add_restaurant(restaurantDict):
         # TODO: do deduping and ish. We'll need it done.
         urlName = retaurantDict['name'].lower().split(' ').join('-')
 
+
+    print("The restaurant urlName is ", urlName)
     # collision check.
     existingRestaurant = get_restaurant_from_urlname(urlName)
     if existingRestaurant:
+        print("But the existing_restaurant is like ", to_public_dict(existingRestaurant))
         print("Could not add restaurantDict because it already exists: {}".format(restaurantDict))
 
     # Otherwise, we're good...

@@ -160,6 +160,11 @@ class User(ModelBase):
         # Yay, this is the best.
         return (True, "")
 
+    # Stuff that the average person should be able to see.
+    def public_fields(self):
+        return ['id', 'display_name', 'first_name', 'last-name', 'phone', 'last_lat', 'last_lon', 'last_zip', 'avatar_path', 'is_influencer', 'num_posts', 'num_followers']
+
+
 # This is different from a post. This is more of a list of dishes that a normal user has
 # hearted or something.
 class UserFaveDishes(ModelBase):
@@ -239,6 +244,9 @@ class Dish(ModelBase):
             return (False, "Dish {} price {} must be positive".format(self.id, self.price))
 
         return (True, "")
+
+    def public_fields(self):
+        return ['id', 'name', 'restaurant_id', 'price', 'description', 'category', 'num_views', 'num_hearts', 'main_photo']
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
@@ -346,7 +354,12 @@ class Restaurant(ModelBase):
         if (not self.delivery_options) or (not self.pos_options):
             return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
 
+        if not (self.url_name):
+            return (False, "Creating a restaurant: empty url_names are not allowed")
         return (True, "")
+
+    def public_fields(self):
+        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
 
 # A single order.
 class Order(ModelBase):
@@ -458,6 +471,8 @@ class Order(ModelBase):
         # This doesn't need to be a big deal... so let's keep it simple for now.
         return (True, "")
 
+    def public_fields(self):
+        pass
 
 # TODO: do this.
 # A DishReview can be done by an influencer
