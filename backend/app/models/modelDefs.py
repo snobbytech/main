@@ -35,7 +35,7 @@ def to_public_dict(modelbaseInstance):
     for key in modelbaseInstance.__dict__:
         if key in publicFields:
             if key == 'id':
-                dictRep[key] = str(modelbaseInstace.__dict__[key])
+                dictRep[key] = str(modelbaseInstance.__dict__[key])
             else:
                 dictRep[key] = modelbaseInstance.__dict__[key]
 

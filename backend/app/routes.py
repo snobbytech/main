@@ -47,15 +47,16 @@ def index():
     return "Hello, World!"
 
 # Probably don't need a full address solution yet.
+# Verified works.
 @flask_app.route("/zip_to_latlon", methods=['GET'])
 def zip_to_latlon():
 
     # Usually, request.form['zip']
-    zip = '10011'
+    zipCode = '10011'
+    latlon = tools.decode_zip(zipCode)
+    return jsonify(latlon)
 
-    latlon = tools.decode_zip(zip)
-    return jsonify(zip)
-
+# Verified works.
 @flask_app.route("/get_influencer_public", methods=['GET'])
 def get_influencer_public():
 
@@ -71,6 +72,7 @@ def get_influencer_public():
     return {}
 
 # Has option of restricting by location too.
+# Verified works.
 @flask_app.route("/get_influencer_dishes", methods=['GET'])
 def get_influencer_dishes():
 
