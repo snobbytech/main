@@ -37,7 +37,7 @@ def decode_zip(zipCode):
 # again.  I trust you know how to do that, good sir.
 
 def get_bounding_latlons(lat, lon, dist_away_mils):
-        lat_offset = abs(dist_away_miles / 69.0)
+    lat_offset = abs(dist_away_miles / 69.0)
     lon_offset = abs(dist_away_miles / (69.0 * cos(radians(lat))))
 
 
