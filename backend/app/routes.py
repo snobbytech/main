@@ -4,10 +4,10 @@ from flask import Flask, jsonify, request, Response
 import sys
 import traceback
 import json
-import tools
+from . import tools
 
-from models.modelDefs import to_public_dict
-from models import modelTools as mt
+from app.models.modelDefs import to_public_dict
+from app.models import modelTools as mt
 
 """
 Basic endpoints from the backend. We'll eventually take some of this biz logic

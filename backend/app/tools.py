@@ -56,4 +56,4 @@ def get_bounding_latlons(lat, lon, dist_away_mils):
     # But because this only goes through parts of the russian land bridge, antarctica,
     # and fiji, I think we can punt this until we get big enough there.
 
-    return {'lat_max': lat_max, 'lat_min': lat_min, 'lon_max': lon_max, 'lon-lon_min}
+    return {'lat_max': lat_max, 'lat_min': lat_min, 'lon_max': lon_max, 'lon_min': lon_min}
