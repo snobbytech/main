@@ -45,16 +45,76 @@ function UserPage(props) {
     const classes = useStyles();
     const history = useHistory();
 
+    const [err, setErr] = useState("");
     // Their zip code.
-    const [userZip, setUserZip] = useState("");
+    const [usingZip, setUsingZip] = useState("");
 
+    // Basic info on the influencer.
+    const [userInfo, setUserInfo] = useState({});
 
+    // Basic info on the influencer's favorite dishes.
     // Note: this could be uninitialized, so I want to be careful here.
     const [faveDishes, setFaveDishes] = useState([]);
+
+    useEffect(() => {
+
+        // Grab the username.
+        // TODO: change this name.
+        let influencer_username = window.location.pathname.substring(
+            window.location.pathname.lastIndexOf("/") + 1
+        );
+
+        if (!influencer_username) {
+            setErr("Did not find the correct username.");
+            return;
+        }
+
+        // Otherwise, place a request to the backend to get the user's info, and
+        // also all their datas.
+
+
+        // Sure, why not.
+        let zip_code = "10011";
+
+        // First, set the user's basic info:
+        let userInfoForm = new FormData();
+        userInfoForm.set("influencer_username", influencer_username);
+
+        let info_url = new URL(USING_URL + "/fetch_influencer_info");
+        fetch(info_url, {
+            method: "POST",
+            body: userInfoForm,
+        }).then((response) => {
+            // ugh.
+            if (response.status == 200) {
+                response.json().then((data) => {
+                    if (data.success) {
+                        // Then we can set it...
+
+                        // Also, then we can start fetching their dishes?
+                    } else {
+                        // Another error condition.
+                    }
+                }).catch((error) => {
+                    // Other error handling.
+
+                })
+            } else {
+                // Some error handling.
+
+            }
+
+        })
+
+
+    }, [])
+
 
 
     // This should be set after
     let dishes_section = '';
+
+
 
 
     return (
