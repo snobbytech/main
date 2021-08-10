@@ -72,6 +72,8 @@ def zip_to_latlon():
 @flask_app.route("/get_influencer_info", methods=['POST'])
 def get_influencer_info():
     #
+    print("Hi, I ran here")
+    print(request)
     # usually, request.form['influencer_name']
     influencer_dict = {}
     try:
@@ -79,12 +81,15 @@ def get_influencer_info():
         #influencer_name = 'fionaeats365'
         influencer_obj = mt.get_user(display_name=influencer_username)
         if influencer_obj:
+            print("Herro")
             influencer_dict = to_public_dict(influencer_obj)
 
     except Exception as e:
         traceback.print_exc()
         return jsonify(std_fail_dict)
 
+    print("About to return")
+    print(influencer_dict)
     return jsonify({'success': True, 'info_dict': influencer_dict})
 
 

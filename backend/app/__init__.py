@@ -11,13 +11,12 @@ TODO: turn this into a well-structured thing. For now, it's kind of just a modul
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+from flask_cors import CORS
 
 # TODO: integrate sentry.
 
-
-
-
 flask_app = Flask(__name__, instance_relative_config=True)
+CORS(flask_app)
 
 # Load default configs.
 flask_app.config.from_object('config.default')
