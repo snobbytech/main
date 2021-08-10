@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import OurHeader from "./components/OurHeader";
 import { useMediaQuery } from "react-responsive";
 
-import GetZip from "./components/GetZip";
 import { makeStyles } from "@material-ui/core/styles";
 import { Layout, Space } from "antd";
 import { Typography } from "antd";
@@ -18,6 +17,14 @@ import amplitude from "amplitude-js";
 // Sentry stuff
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
+
+// Our components.
+import GetZip from "./components/GetZip";
+import UserPage from "./components/UserPage";
+import StartCheckout from "./components/StartCheckout";
+import OrderConfirm from "./components/OrderConfirm";
+
+
 
 const { Header, Content, Footer } = Layout;
 
@@ -108,6 +115,15 @@ function App(props) {
                     exact
                     render={(props) => <GetZip {...props} />}
                   />
+
+                  <Route
+                    path="/u/:uid"
+                    exact
+                    render={(props) => <UserPage {...props} />}
+                  />
+
+
+
                 </Switch>
               </div>
             </Content>

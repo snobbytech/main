@@ -49,7 +49,8 @@ function GetZip(props) {
 
         // Get the value.
         let zipcode = document.getElementById('zipcode_input').value.trim();
-        return;
+
+        // Construct and set the window.
 
         // Make sure that it's a real zipcode?
         if (zipcode.length != 5) {
@@ -64,12 +65,19 @@ function GetZip(props) {
         let qss = qs.parse(window.location.search, {ignoreQueryPrefix: true});
         refer_name = qss.refer_name;
 
+        if (!refer_name) {
+            // OK, let's just assume an influencer. Someone like fionaeats.
+            refer_name = 'fionaeats365';
+        }
 
+        console.log("About to redirect to", refer_name);
+
+        /*
         // TODO: save the history.
         history.push({
             pathname: "/u/" + refer_name,
         });
-
+        */
 
     }
 
