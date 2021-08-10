@@ -1,0 +1,226 @@
+/*
+    I copied a lot of this over from the calendly-clone frontend.
+    I think I can work from this, though it'll probably take a good amount of more work.
+
+    TODO: A lot of these styles are done by picking
+
+*/
+
+
+
+/*
+
+This pair of settings is a hack, because I couldn't get dayheaderContent to run on
+fullCalendar.  So I'm basically making the days of the week look unclickable
+
+Look, if I wanted to get help on fullCalendar that much I would pay someone from their team to
+help me.
+
+*/
+a.fc-col-header-cell-cushion {
+  color: #333333;
+  cursor:default;
+}
+a.fc-col-header-cell-cushion:hover {
+  color: #333333;
+  text-decoration:none;
+  cursor:default;
+}
+
+
+.time-div-active {
+    max-width: 900px;
+  }
+
+  #calendar-picker #calendar {
+    font-family: Lato;
+    font-weight: 300;
+    -webkit-box-flex: 2;
+        -ms-flex: 2;
+            flex: 2;
+  }
+
+  #calendar-picker table {
+    border: none;
+  }
+
+  #calendar-picker .fc-scrollgrid {
+    border: 1px solid #b2b2b2;
+    padding: .5rem;
+  }
+
+  /* Don't inherit the <a> coloring */
+  #calendar-picker .fc-theme-standard td, #calendar-picker .fc-theme-standard th {
+    border: none;
+  }
+
+  #calendar-picker .fc-toolbar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  #calendar-picker .fc-today-button {
+    display: none;
+  }
+
+  #calendar-picker .fc-prev-button, #calendar-picker .fc-next-button {
+    color: dodgerblue;
+    background-color: white;
+    border-color: white;
+    outline: none;
+  }
+
+  #calendar-picker .fc .fc-button-primary:focus {
+    -webkit-box-shadow: 0;
+            box-shadow: 0;
+  }
+
+  #calendar-picker .fc-col-header-cell {
+    font-weight: 300;
+    font-size: .8rem;
+  }
+
+  #calendar-picker .fc-daygrid-day-frame {
+    justify-content: center;
+    align-items: center;
+  }
+
+  /*
+  #calendar-picker .fc-daygrid-day {
+    font-weight: 400;
+    color: #7b7b7b;
+  }
+*/
+
+  #calendar-picker .fc-daygrid-day-events {
+    margin: 0;
+  }
+
+  #calendar-picker .fc-daygrid-day-number {
+    margin: auto;
+  }
+
+/* Today is this day */
+#calendar-picker .fc-day-today {
+  background-color: #fff;
+}
+
+#calendar-picker .fc-day-disabled {
+  background: #fff;
+
+}
+
+/* Days that are not choosable */
+#calendar-picker .fc-day-disabled a{
+  cursor: default;
+  color: #b2b2b2;
+}
+
+#calendar-picker .fc-day-disabled a:hover{
+  cursor: default;
+  color: #b2b2b2;
+  text-decoration: none;
+}
+
+
+/* Div containing the following element */
+#calendar-picker .enabled-calendar{
+    background-color: #c5e7ff8a;
+    cursor:pointer;
+}
+
+/*
+This is a div containing a *selectable* day.
+*/
+  #calendar-picker .enabled-calendar .fc-daygrid-day-top{
+/*
+    border-radius: 35px;
+    border: 2px solid dodgerblue;
+    padding: 10px;
+    */
+  }
+
+  /* This undoes the highlighting for things that we don't want highlighted, which is good... */
+  #calendar-picker .fc .fc-highlight {
+      background: initial;
+  }
+
+  .schedule-div {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+  .available-times {
+    flex: 2;
+  }
+
+
+  .calendar-container {
+      flex: 5;
+  }
+
+  .time-slot {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+
+  .time-btn {
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    border: 1px solid #1890ff;
+    color: #1890ff;
+    background-color: white;
+    width: 100%;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .time-btn:hover {
+    border-width: 1px;
+    border-color: #3597ff;
+    cursor: pointer;
+  }
+
+  .time-btn:focus {
+    outline: none;
+    border: none;
+  }
+
+  .time-btn:focus:hover {
+    border: none;
+  }
+
+
+  .time-btn-selected {
+    background-color: #3597ff;
+    font-weight: 500;
+    color: white;
+    outline: none;
+    border: none;
+  }
+
+
+  .confirm-btn {
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    width: 100%;
+    margin-left: 5px;
+  }
+
+  .confirm-btn:hover {
+    opacity: 0.5;
+  }
+
+  .confirm-btn:focus {
+    outline: 0;
+    opacity: 0.5;
+  }
+
+  /*# sourceMappingURL=schedule.css.map */
+
+
