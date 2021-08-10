@@ -73,8 +73,7 @@ function OneDish(props) {
     const onSelect = () => {
 
         // Redirects you to the checkout page for this dish.
-
-
+        //console.log("Well, this was clicked, so you can actually... redirect now.")
     }
 
     let internal = '';
@@ -87,7 +86,7 @@ function OneDish(props) {
                 src={props.dish.main_photo}
                 />
                 <div>
-                    {props.dish.name} {props.dish.price}
+                    {props.dish.name} ${props.dish.price}
                 </div>
 
             </div>
