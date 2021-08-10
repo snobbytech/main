@@ -86,19 +86,22 @@ def get_influencer_dishes():
     return jsonify(all_dishes)
 
 
+# Verified works.
 @flask_app.route("/get_influencer_dishes_area", methods=['GET'])
 def get_influencer_dishes_area():
     influencer_name = 'fionaeats365'
     # in miles.
-    radius = 50000
+    radius = 5
     zipCode = '10011'
 
     latlons = tools.decode_zip(zipCode)
     influencer = mt.get_user(display_name=influencer_name)
+    print(latlons)
     local_dishes = mt.get_influencer_local_dishes(userId=influencer.id,
                                                   lat=latlons['lat'],
                                                   lon=latlons['lon'],
                                                   milesRadius=radius)
+
 
     # We should probably get the restaurants too? Maybe in teh future at least.
     all_dishes = []
@@ -107,7 +110,7 @@ def get_influencer_dishes_area():
 
     return jsonify(all_dishes)
 
-
+# Verified works.
 @flask_app.route("/get_dish_info", methods=['GET'])
 def get_dish_info():
 
@@ -120,13 +123,16 @@ def get_dish_info():
         return jsonify(to_public_dict(one_dish))
     return None
 
+# Verified works.
 @flask_app.route("/get_restaurant_info", methods=['GET'])
 def get_restaurant_info():
 
-    restaurant_name = 'Cafeteria'
+    # Needs to be lowercase, remember.
+    restaurant_name = 'cafeteria'
     # Really, should be getting this from a restaurant_id or a name-and-internal thing
     # or something.
-    the_restaurant = mt.get_restaurant_from_name(restaurant_name)
+    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
+
 
     return jsonify(to_public_dict(the_restaurant))
 
@@ -134,8 +140,8 @@ def get_restaurant_info():
 @flask_app.route("/get_restaurant_dishes", methods=['GET'])
 def get_restaurant_dishes():
 
-    restaurant_name = 'Cafeteria'
-    the_restaurant = mt.get_restaurant_from_name(restaurant_name)
+    restaurant_name = 'cafeteria'
+    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
 
     # Now get dishes
     the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)

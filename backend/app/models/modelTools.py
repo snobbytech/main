@@ -192,6 +192,8 @@ def get_restaurant(restaurantId):
 
 def get_restaurant_from_urlname(urlName):
     with session_scope() as ss:
+        print(urlName)
+        print("poop")
         return ss.query(Restaurant).filter(Restaurant.url_name==urlName).first()
     return None
 
@@ -270,18 +272,21 @@ def get_local_influencers(lat, lon, milesRadius=500):
 
 # Only get their dishes that are close to you.
 def get_influencer_local_dishes(userId, lat, lon, milesRadius=5):
-    # Huh, I guess I never did implement this, huh. 
+    # Huh, I guess I never did implement this, huh.
 
     bounds = tools.get_bounding_latlons(lat, lon, milesRadius)
+    print("I got bounds like ", bounds)
 
-    # Now we can make the request? 
+    # Now we can make the request?
     with session_scope() as ss:
-        # Question... does this join... work? 
+        # Question... does this join... work?
+        print("The bounds are ")
         dishQuery = ss.query(Dish).join(UserFaveDishes).join(Restaurant).filter(UserFaveDishes.user_id==userId)
         dishQuery = dishQuery.filter(Restaurant.lat <= bounds['lat_max'])
         dishQuery = dishQuery.filter(Restaurant.lat >= bounds['lat_min'])
         dishQuery = dishQuery.filter(Restaurant.lon <= bounds['lon_max'])
         dishQuery = dishQuery.filter(Restaurant.lon >= bounds['lon_min'])
+
         return dishQuery.all()
     # OK, now return it...
     return []
