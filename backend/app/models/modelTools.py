@@ -9,6 +9,7 @@ from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserFaveDi
 from .modelSetup import session_scope, con, dropAllTables
 from . import modelBase
 
+from app import tools
 
 from collections import defaultdict
 import datetime
@@ -72,12 +73,15 @@ def mod_user(userDict):
 def delete_user(userId):
     pass
 
-def get_user(userId=None, email=''):
+def get_user(userId=None, email='', display_name=''):
     with session_scope() as ss:
         if userId:
             return ss.query(User).get(userId)
         elif email:
             return ss.query(User).filter(User.email==email).first()
+        elif display_name:
+            return ss.query(User).filter(User.display_name==display_name).first()
+            pass
         # Failure mode.
         return None
 
@@ -119,10 +123,40 @@ def get_dish(dishId):
         return ss.query(Dish).get(dishId)
     return None
 
+def get_dish_with_name(dishName):
+    with session_scope() as ss:
+        return ss.query(Dish).filter(Dish.name==dishName).first()
+    return None
+
+def get_arbitrary_dish():
+    # Just a happy accident for instances where we need a dish to do testing on.
+    with session_scope() as ss:
+        return ss.query(Dish).first()
+    return None
+
 ###########################################################
 # Restaurants
 def add_restaurant(restaurantDict):
     newRestaurant = Restaurant()
+
+    # Check and perhaps update the urlname.
+    urlName = ''
+    if 'url_name' in restaurantDict:
+        urlName = restaurantDict['url_name']
+    else:
+        # We have to give them a urlName.
+        urlName = '-'.join(restaurantDict['name'].lower().split(' '))
+    # TODO: do deduping and ish. We'll need it done.
+
+    # collision check.
+    existingRestaurant = get_restaurant_from_urlname(urlName)
+    if existingRestaurant:
+        print("But the existing_restaurant is like ", to_public_dict(existingRestaurant))
+        print("Could not add restaurantDict because it already exists: {}".format(restaurantDict))
+
+    # Otherwise, we're good...
+    restaurantDict['url_name'] = urlName
+
     newRestaurant.populate_from_dict(restaurantDict)
     valid, msg = newRestaurant.validate()
     if valid:
@@ -156,6 +190,12 @@ def get_restaurant(restaurantId):
         return ss.query(Restaurant).get(restaurantId)
     return None
 
+def get_restaurant_from_urlname(urlName):
+    with session_scope() as ss:
+        print(urlName)
+        print("poop")
+        return ss.query(Restaurant).filter(Restaurant.url_name==urlName).first()
+    return None
 
 ###########################################################
 # Connectors.
@@ -163,9 +203,15 @@ def get_restaurant(restaurantId):
 # Cool, now we're doing per-user dishes.
 
 # This should return a list of dish objects.
-def get_dishes_for_user(userId='', displayName=''):
+def get_dishes_for_user(userId='', influencerName=''):
     # Easier if we have displayname, at some point might just have
     # their uid tho. Let's start by assuming userId.
+
+
+    if not userId:
+        # Get the userId from the influencerName.
+        theUser = get_user(display_name=influencerName)
+        userId = theUser.id
 
     # TODO: test this.
     with session_scope() as ss:
@@ -226,7 +272,24 @@ def get_local_influencers(lat, lon, milesRadius=500):
 
 # Only get their dishes that are close to you.
 def get_influencer_local_dishes(userId, lat, lon, milesRadius=5):
-    pass
+    # Huh, I guess I never did implement this, huh.
+
+    bounds = tools.get_bounding_latlons(lat, lon, milesRadius)
+    print("I got bounds like ", bounds)
+
+    # Now we can make the request?
+    with session_scope() as ss:
+        # Question... does this join... work?
+        print("The bounds are ")
+        dishQuery = ss.query(Dish).join(UserFaveDishes).join(Restaurant).filter(UserFaveDishes.user_id==userId)
+        dishQuery = dishQuery.filter(Restaurant.lat <= bounds['lat_max'])
+        dishQuery = dishQuery.filter(Restaurant.lat >= bounds['lat_min'])
+        dishQuery = dishQuery.filter(Restaurant.lon <= bounds['lon_max'])
+        dishQuery = dishQuery.filter(Restaurant.lon >= bounds['lon_min'])
+
+        return dishQuery.all()
+    # OK, now return it...
+    return []
 
 def get_local_dishes(lat, lon, milesRadius=5):
     pass
@@ -235,15 +298,35 @@ def get_local_dishes(lat, lon, milesRadius=5):
 # Initiate order
 
 def make_order(orderDict):
-    pass
+
+    newOrder = Order()
+    newOrder.populate_from_dict(orderDict)
+    valid, msg = newOrder.validate()
+    if valid:
+        with session_scope() as ss:
+            ss.add(newOrder)
+            ss.flush()
+        return newOrder
+    return None
 
 # What does this mean?
-def update_order(orderDict):
-    pass
+def update_order(orderId, orderDict):
 
-def finalize_order(orderDict):
-    pass
+    the_order = get_order(orderId)
+    if the_order:
+        the_order.populate_from_dict(orderDict)
+        valid, msg = the_order.validate()
+        if valid:
+            with session_scope() as ss:
+                ss.add(the_order)
+                ss.flush()
+            return the_order
+    return None
 
+def get_order(orderId):
+    with session_scope() as ss:
+        return ss.query(Order).get(orderId)
+    return None
 
 # Get all my orders.
 def get_users_orders(userId):

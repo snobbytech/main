@@ -115,8 +115,8 @@ def populate_dev():
             'last_name': 'Lee',
             'phone': '5555555555',
             # TODO: make these real
-            'last_lat': '55',
-            'ast_lon': '66',
+            'last_lat': '40.7',
+            'last_lon': '-74',
             'avatar_path': 'https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/s150x150/22860415_127527041290709_4461503634995150848_n.jpg?_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_ohc=LiY00VQXhEYAX98_KtK&edm=ABfd0MgBAAAA&ccb=7-4&oh=321a67eb8c5d277851139869ed64c1fb&oe=61137BA6&_nc_sid=7bff83',
             'is_influencer': True,
             'num_posts': 5,
@@ -131,8 +131,8 @@ def populate_dev():
             'last_name': 'Rushton',
             'phone': '5555555556',
             # TODO: make these real
-            'last_lat': '55',
-            'ast_lon': '66',
+            'last_lat': '40.6',
+            'ast_lon': '-74',
             # I grabbed thsi... urgh.
             'avatar_path': 'https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/s150x150/23507843_111119566331044_2839676077960331264_n.jpg?_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_ohc=_39k0g50mr0AX_dwh4H&edm=ANmP7GQBAAAA&ccb=7-4&oh=d5d05cff4e4d9fe04261d90b39a58cf3&oe=6112C08E&_nc_sid=276363',
             'is_influencer': True,
@@ -160,8 +160,8 @@ def populate_dev():
             'state': 'NY',
             'country': 'USA',
             'zip_code': '10011',
-            'lat': '100',
-            'lon': '100',
+            'lat': '40.8',
+            'lon': '-74',
             'num_hearts': 0,
             'category': ''
         },
@@ -180,8 +180,8 @@ def populate_dev():
             'state': 'NY',
             'country': 'USA',
             'zip_code': '10011',
-            'lat': '100',
-            'lon': '100',
+            'lat': '40.7',
+            'lon': '-74',
             'num_hearts': 0,
             'category': ''
         },

@@ -35,7 +35,7 @@ def to_public_dict(modelbaseInstance):
     for key in modelbaseInstance.__dict__:
         if key in publicFields:
             if key == 'id':
-                dictRep[key] = str(modelbaseInstace.__dict__[key])
+                dictRep[key] = str(modelbaseInstance.__dict__[key])
             else:
                 dictRep[key] = modelbaseInstance.__dict__[key]
 
@@ -160,6 +160,11 @@ class User(ModelBase):
         # Yay, this is the best.
         return (True, "")
 
+    # Stuff that the average person should be able to see.
+    def public_fields(self):
+        return ['id', 'display_name', 'first_name', 'last-name', 'phone', 'last_lat', 'last_lon', 'last_zip', 'avatar_path', 'is_influencer', 'num_posts', 'num_followers']
+
+
 # This is different from a post. This is more of a list of dishes that a normal user has
 # hearted or something.
 class UserFaveDishes(ModelBase):
@@ -240,12 +245,19 @@ class Dish(ModelBase):
 
         return (True, "")
 
+    def public_fields(self):
+        return ['id', 'name', 'restaurant_id', 'price', 'description', 'category', 'num_views', 'num_hearts', 'main_photo']
+
 # Pretty simple, right.
 class Restaurant(ModelBase):
     __tablename__ = 'restaurants'
     id = Column(Integer, primary_key=True)
 
     name = Column(String)
+
+    # We should be using this for url endpoints.
+    url_name = Column(String)
+
     # For contact.
     phone = Column(String)
     # Need this to send orders for now.
@@ -294,6 +306,8 @@ class Restaurant(ModelBase):
     def populate_from_dict(self, props):
         if 'name' in props:
             self.name = props['name']
+        if 'url_name' in props:
+            self.url_name = props['url_name']
         if 'phone' in props:
             self.phone = props['phone']
         if 'email' in props:
@@ -340,7 +354,12 @@ class Restaurant(ModelBase):
         if (not self.delivery_options) or (not self.pos_options):
             return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
 
+        if not (self.url_name):
+            return (False, "Creating a restaurant: empty url_names are not allowed")
         return (True, "")
+
+    def public_fields(self):
+        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
 
 # A single order.
 class Order(ModelBase):
@@ -367,6 +386,7 @@ class Order(ModelBase):
     taxes         = Column(Float)
     delivery_fee  = Column(Float)
     tip           = Column(Float)
+    dasher_tip    = Column(Float)
     total_cost    = Column(Float)
 
     our_cut       = Column(Float)
@@ -380,11 +400,17 @@ class Order(ModelBase):
     city = Column(String)
     state = Column(String)
     zip_code = Column(String)
-
     delivery_notes = Column(String)
 
     # One of a few states, we'll have to figure this out.
+    #ORDER_CREATED, RESTAURANT_PREP, OUT_FOR_DELIVERY, DELIVERED, REFUNDED
     delivery_state = Column(String)
+
+    # like the stripe payment id or something.
+    payment_id = ''
+
+    # eg. STRIPE, etc.
+    payment_method = ''
 
     def populate_from_dict(self, props):
         if 'source_influencer' in props:
@@ -401,16 +427,18 @@ class Order(ModelBase):
             self.dishes_stringified = props['dishes_stringified']
         if 'subtotal' in props:
             self.subtotal = float(props['subtotal'])
-        if 'taxes' in props:
-            self.taxes = float(props['taxes'])
+        if 'local_taxes' in props:
+            self.taxes = float(props['local_taxes'])
         if 'delivery_fee' in props:
             self.delivery_fee = float(props['delivery_fee'])
         if 'tip' in props:
             self.tip = float(props['tip'])
+        if 'dasher_tip' in props:
+            self.dasher_tip = float(props['tip'])
         if 'total_cost' in props:
             self.total_cost = float(props['total_cost'])
-        if 'our_cut' in props:
-            self.our_cut = float(props['our_cut'])
+        if 'our_fees' in props:
+            self.our_cut = float(props['our_fees'])
         if 'influencers_cut' in props:
             self.influencers_cut = float(props['influencers_cut'])
         if 'restaurant_payout' in props:
@@ -434,10 +462,17 @@ class Order(ModelBase):
         if 'delivery_state' in props:
             self.delivery_state = props['delivery_state']
 
+        if 'payment_id' in props:
+            self.payment_id = props['payment_id']
+        if 'payment_method' in props:
+            self.payment_method = props['payment_method']
+
     def validate(self):
         # This doesn't need to be a big deal... so let's keep it simple for now.
         return (True, "")
 
+    def public_fields(self):
+        pass
 
 # TODO: do this.
 # A DishReview can be done by an influencer
