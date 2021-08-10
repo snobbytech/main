@@ -36,9 +36,51 @@ Basic page showing an influencer, their likes/stuff, and then the foods they pro
 const useStyles = makeStyles((theme) => ({
     ...universal_styles,
     ...{
+        profilephoto: {
+            // flexShrink: 0,
+            "@media (max-width: 520px)": {
+              margin: "0px",
+              maxWidth: "100%",
+              borderRadius: "7px",
+            },
+            "@media (min-width: 520px)": {
+              objectFit: "cover",
+              height: "400px",
+              maxWidth: "100%",
+              borderRadius: "7px",
+            },
+          },
+
 
     },
   }));
+
+
+  // A thing that represents a single dish.
+function OneDish(props) {
+    const classes = useStyles();
+    const history = useHistory();
+
+    // I don't think I have any... real things here.
+
+    useEffect(() => {
+        // Any init stuff, I guess.
+
+    }, [])
+
+
+    return (
+        <div>
+
+        Noobs.
+        </div>
+    )
+}
+
+
+function DishArray(props) {
+
+}
 
 function UserPage(props) {
 
@@ -128,7 +170,7 @@ function UserPage(props) {
                 response.json().then((data) => {
                     if (data.success) {
                         // Then, we have the dishes.
-                        console.log("We got their dishes", data.all_favorite_dishes);
+                        console.log("We got their dishes", data.all_dishes);
                         setFaveDishes(data.all_dishes);
                     } else {
                         // bad
@@ -142,6 +184,43 @@ function UserPage(props) {
         })
     }
 
+    let personal_section = '';
+
+    // Only two things are:
+    //
+    if (userInfo) {
+        let photo_elt = (
+            <img
+                  className={classes.profilephoto}
+                  src={userInfo.avatar_path}
+                />
+        )
+
+        personal_section = (
+            <div className="row justify-content-center">
+            <div className="col-md-6 my-1">
+
+            <div>
+                {photo_elt}
+            </div>
+
+            <div>
+                {userInfo.display_name}
+            </div>
+            <div>
+                {userInfo.first_name} {userInfo.last_name}
+            </div>
+
+
+
+            </div>
+            </div>
+        )
+
+    }
+    // This is super stupid, but here is my profile.
+
+
 
     // This should be set after
     let dishes_section = '';
@@ -152,8 +231,8 @@ function UserPage(props) {
     return (
 
         <div>
-
-        Soylent green is not you or me.
+        {personal_section}
+        {dishes_section}
         </div>
       )
 

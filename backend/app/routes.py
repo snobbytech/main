@@ -132,9 +132,10 @@ def get_influencer_dishes_area():
         # We should probably get the restaurants too? Maybe in teh future at least.
         for one_dish in local_dishes:
             all_dishes.append(to_public_dict(one_dish))
-    except Expception as e:
+    except Exception as e:
         traceback.print_exc()
         return jsonify(std_fail_dict)
+    #print("So my all_dishes is like ", all_dishes)
     return jsonify({'success': True, 'all_dishes': all_dishes})
 
 # Verified works.
