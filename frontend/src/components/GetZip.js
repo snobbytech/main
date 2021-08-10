@@ -33,6 +33,7 @@ const useStyles = makeStyles({
 function GetZip(props) {
     const [err, setErr] = useState("");
     const history = useHistory();
+    const classes = useStyles();
 
     // Pretty simple thing, right.
 
@@ -40,7 +41,6 @@ function GetZip(props) {
         if (keyEvent.key == "Enter") {
             onSearchZip();
         }
-
     }
 
     const onSearchZip = () => {
@@ -48,7 +48,8 @@ function GetZip(props) {
         setErr("");
 
         // Get the value.
-        let zipcode = document.getElementById('zipcode_input').nodeValue.trim();
+        let zipcode = document.getElementById('zipcode_input').value.trim();
+        return;
 
         // Make sure that it's a real zipcode?
         if (zipcode.length != 5) {
@@ -85,7 +86,7 @@ function GetZip(props) {
         <div className="row justify-content-center">
         <div className="col-md-6 my-1">
           <Input
-            className={}
+            className={""}
             id="zipcode_input"
             placeholder="Zip Code"
             onKeyUp={tryZip}
