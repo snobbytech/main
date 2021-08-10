@@ -80,7 +80,7 @@ function UserPage(props) {
         let userInfoForm = new FormData();
         userInfoForm.set("influencer_username", influencer_username);
 
-        let info_url = new URL(USING_URL + "/fetch_influencer_info");
+        let info_url = new URL(USING_URL + "/get_influencer_info");
         fetch(info_url, {
             method: "POST",
             body: userInfoForm,
@@ -90,8 +90,10 @@ function UserPage(props) {
                 response.json().then((data) => {
                     if (data.success) {
                         // Then we can set it...
-
+                        setUserInfo(data.info_dict)
                         // Also, then we can start fetching their dishes?
+                        console.log("We got their userInfo, ", data.info_dict);
+                        fetch_dishes(influencer_username, zip_code);
                     } else {
                         // Another error condition.
                     }
@@ -109,6 +111,36 @@ function UserPage(props) {
 
     }, [])
 
+    // Making this its own function because nesting all those fxns would make me
+    // insane.
+    const fetch_dishes = (influencer_username, zip_code) => {
+
+        let dishesForm = new FormData();
+        dishesForm.set("influencer_name", influencer_username);
+        dishesForm.set("zip_code", zip_code);
+
+        let dishes_url = new URL(USING_URL + "/get_influencer_dishes_area");
+        fetch(dishes_url, {
+            method: "POST",
+            body: dishesForm,
+        }).then((response) => {
+            if (response.status == 200) {
+                response.json().then((data) => {
+                    if (data.success) {
+                        // Then, we have the dishes.
+                        console.log("We got their dishes", data.all_favorite_dishes);
+                        setFaveDishes(data.all_dishes);
+                    } else {
+                        // bad
+                    }
+                }).catch((error) => {
+                    // bad 2
+                })
+            } else {
+                // bad 3.
+            }
+        })
+    }
 
 
     // This should be set after

@@ -69,15 +69,15 @@ def zip_to_latlon():
     return jsonify({'success': True, 'latlon': latlon})
 
 # Verified works.
-@flask_app.route("/get_influencer_info", methods=['GET'])
+@flask_app.route("/get_influencer_info", methods=['POST'])
 def get_influencer_info():
     #
     # usually, request.form['influencer_name']
     influencer_dict = {}
     try:
-        influencer_name = request.form['influencer_name']
+        influencer_username = request.form['influencer_username']
         #influencer_name = 'fionaeats365'
-        influencer_obj = mt.get_user(display_name=influencer_name)
+        influencer_obj = mt.get_user(display_name=influencer_username)
         if influencer_obj:
             influencer_dict = to_public_dict(influencer_obj)
 
@@ -90,7 +90,7 @@ def get_influencer_info():
 
 # Has option of restricting by location too.
 # Verified works.
-@flask_app.route("/get_influencer_dishes", methods=['GET'])
+@flask_app.route("/get_influencer_dishes", methods=['POST'])
 def get_influencer_dishes():
 
     all_dishes = []
@@ -108,7 +108,7 @@ def get_influencer_dishes():
 
 
 # Verified works.
-@flask_app.route("/get_influencer_dishes_area", methods=['GET'])
+@flask_app.route("/get_influencer_dishes_area", methods=['POST'])
 def get_influencer_dishes_area():
     all_dishes = []
     try:
@@ -133,7 +133,7 @@ def get_influencer_dishes_area():
     return jsonify({'success': True, 'all_dishes': all_dishes})
 
 # Verified works.
-@flask_app.route("/get_dish_info", methods=['GET'])
+@flask_app.route("/get_dish_info", methods=['POST'])
 def get_dish_info():
 
     dish_dict = {}
@@ -153,7 +153,7 @@ def get_dish_info():
     return jsonify({'success': True, 'dish': dish_dict})
 
 # Verified works.
-@flask_app.route("/get_restaurant_info", methods=['GET'])
+@flask_app.route("/get_restaurant_info", methods=['POST'])
 def get_restaurant_info():
 
     restaurant_dict = {}
@@ -168,7 +168,7 @@ def get_restaurant_info():
     return jsonify({'success': True, 'restaurant': restaurant_dict})
 
 
-@flask_app.route("/get_restaurant_dishes", methods=['GET'])
+@flask_app.route("/get_restaurant_dishes", methods=['POST'])
 def get_restaurant_dishes():
 
     all_dishes = []
@@ -187,7 +187,7 @@ def get_restaurant_dishes():
 
 # Returns a dict...
 # OK, this is not as necessary right now.
-@flask_app.route("/get_dish_payment", methods=['GET'])
+@flask_app.route("/get_dish_payment", methods=['POST'])
 def get_dish_payment():
 
     dish_name = 'Fried Chicken and Waffles'
