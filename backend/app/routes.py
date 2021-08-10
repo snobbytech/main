@@ -41,6 +41,8 @@ Also, to start: making all these GETS, but eventually will move things to POST.
 
 """
 
+std_err = 'We hit an error in the server. It was logged'
+std_fail_dict = {'success': False, 'msg': std_err}
 
 @flask_app.route('/')
 def index():
@@ -60,7 +62,7 @@ def zip_to_latlon():
     except Exception as e:
         traceback.print_exc()
         # Best thing is to log this with a traceback.
-        return jsonify({'success': False, 'msg': 'Hit an error in the backend'})
+        return jsonify(std_fail_dict)
 
     # TODO: it's probably easier on both ends if I just return some weird like error codes instead of
     # jsonifying these success bools. Big todo then to simplify this chain.
@@ -81,7 +83,7 @@ def get_influencer_info():
 
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'success': False, 'msg': 'Hit an error in the server. It was logged'})
+        return jsonify(std_fail_dict)
 
     return jsonify({'success': True, 'info_dict': influencer_dict})
 
@@ -101,8 +103,7 @@ def get_influencer_dishes():
             all_dishes.append(to_public_dict(one_dish))
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'success': False, 'msg': 'Hit an error in the server - it was logged'})
-
+        return jsonify(std_fail_dict)
     return jsonify({'success': True, 'dishes': all_dishes})
 
 
@@ -128,51 +129,64 @@ def get_influencer_dishes_area():
             all_dishes.append(to_public_dict(one_dish))
     except Expception as e:
         traceback.print_exc()
-        return jsonify({'Success': False, 'msg': 'Hit an error in the server, it was logged'})
+        return jsonify(std_fail_dict)
     return jsonify({'success': True, 'all_dishes': all_dishes})
 
 # Verified works.
 @flask_app.route("/get_dish_info", methods=['GET'])
 def get_dish_info():
 
+    dish_dict = {}
     # Pretty simple thing, eh?
-    dish_name = 'Fried Chicken and Waffles'
-    one_dish = mt.get_dish_with_name(dish_name)
+    try:
+        dish_id = request.form['dish_id']
 
-    # Uhh, I guess then I... do it?
-    if one_dish:
-        return jsonify(to_public_dict(one_dish))
-    return None
+        #dish_name = 'Fried Chicken and Waffles'
+        one_dish = mt.get_dish(dish_id)
+
+        # Uhh, I guess then I... do it?
+        if one_dish:
+            dish_dict = to_public_dict(one_dish)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    return jsonify({'success': True, 'dish': dish_dict})
 
 # Verified works.
 @flask_app.route("/get_restaurant_info", methods=['GET'])
 def get_restaurant_info():
 
-    # Needs to be lowercase, remember.
-    restaurant_name = 'cafeteria'
-    # Really, should be getting this from a restaurant_id or a name-and-internal thing
-    # or something.
-    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
+    restaurant_dict = {}
+    try:
+        restaurant_urlname = request.form['urlname']
+        restaurant = mt.get_restaurant_from_urlname(restaurant_urlname)
+        restaurant_dict = to_public_dict(restaurant)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
 
-
-    return jsonify(to_public_dict(the_restaurant))
+    return jsonify({'success': True, 'restaurant': restaurant_dict})
 
 
 @flask_app.route("/get_restaurant_dishes", methods=['GET'])
 def get_restaurant_dishes():
 
-    restaurant_name = 'cafeteria'
-    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
-
-    # Now get dishes
-    the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)
     all_dishes = []
-    for one_dish in the_dishes:
-        all_dishes.append(to_public_dict(one_dish))
+    try:
+        restaurant_urlname = request.form['urlname']
+        the_restaurant = mt.get_restaurant_from_urlname(restaurant_urlname)
 
-    return jsonify(all_dishes)
+        # Now get dishes
+        the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)
+        for one_dish in the_dishes:
+            all_dishes.append(to_public_dict(one_dish))
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    return jsonify({'success': True, 'dishes': all_dishes})
 
 # Returns a dict...
+# OK, this is not as necessary right now.
 @flask_app.route("/get_dish_payment", methods=['GET'])
 def get_dish_payment():
 
