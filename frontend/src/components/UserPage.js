@@ -56,7 +56,8 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 
-  // A thing that represents a single dish.
+// This all might be too much work.
+// A thing that represents a single dish.
 function OneDish(props) {
     const classes = useStyles();
     const history = useHistory();
@@ -69,16 +70,76 @@ function OneDish(props) {
     }, [])
 
 
-    return (
-        <div>
+    const onSelect = () => {
 
-        Noobs.
+        // Redirects you to the checkout page for this dish.
+
+
+    }
+
+    let internal = '';
+    // Easy thing.
+    // photo,
+    if (props.dish) {
+        internal = (
+            <div>
+                <img className={classes.profilephoto}
+                src={props.dish.main_photo}
+                />
+                <div>
+                    {props.dish.name} {props.dish.price}
+                </div>
+
+            </div>
+        )
+    }
+
+    return (
+        <div onClick={onSelect}>
+            {internal}
         </div>
     )
 }
 
 
+// Basically, dishes should be arranged like this.
 function DishArray(props) {
+
+    const classes = useStyles();
+    const history = useHistory();
+
+    // Not super importante.
+    useEffect(() => {
+    }, []);
+
+    console.log("Doin it inside DishArray, the dishes are ", props.dishes);
+
+    let childDishes = '';
+    if (props.dishes) {
+        // We will
+
+        childDishes = (
+            <div>
+                {
+                    props.dishes.map((oneDish, index) => {
+                        // Something simple.
+                        return (
+                            <OneDish dish={oneDish} key={index} />
+                        )
+
+                    })
+                }
+
+            </div>
+        )
+    }
+
+    return (
+        <div>
+            {childDishes}
+        </div>
+    )
+
 
 }
 
@@ -224,7 +285,10 @@ function UserPage(props) {
 
     // This should be set after
     let dishes_section = '';
+    if (faveDishes) {
 
+        dishes_section = (<DishArray dishes={faveDishes} />)
+    }
 
 
 
