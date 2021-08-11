@@ -24,7 +24,60 @@ import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles({
 
-    btn: {
+    btn_container: {
+      display: "flex",
+      justifyContent: "flex-end",
+    },
+
+    doneBtn: {
+      fontFamily: 'Poppins, sans-serif',
+      fontStyle: "normal",
+      fontWeight: "normal",
+      fontSize: "16px",
+      lineHeight: "24px",
+      /* identical to box height */
+      letterSpacing: "-0.0041em",
+      /* Gray/300 */
+      color: "#8C93A6",
+      cursor: 'pointer',
+      "&:hover": {
+        color: "#454953",
+      },
+
+    },
+
+    zip_text: {
+      fontFamily: "Quicksand, sans-serif",
+      fontStyle: "normal",
+      fontWeight: "bold",
+      fontSize: "28px",
+      lineHeight: "40px",
+      /* identical to box height, or 143% */
+
+/*      display: flex;
+      align-items: center;
+      */
+      letterSpacing: "-0.0041em",
+
+      color: "#151E34",
+    },
+
+    zip_input: {
+      height: "50px",
+      /* Making this 100% because it's contained in a column that does sizing better.*/
+      width: "100%",
+
+      /* Yellow primary */
+
+      border: "2px solid #FFE600",
+      boxSizing: "border-box",
+      borderRadius: "15px",
+
+      "&:focus": {
+        backgroundColor: "#f0f1f3",
+        outline: 'none',
+
+      },
 
     }
 
@@ -83,42 +136,51 @@ function GetZip(props) {
 
 
     let top_text = (
-        <div className="row justify-content-center">
-        <div className="col-md-6 my-1">
-        Please enter your zip code to find nearby dishes.
+        <div className="row justify-content-center my-2">
+        <div className={classes.zip_text + " col-md-8 col-9 my-1"}>
+        I want dishes near...
     </div>
     </div>
     )
 
     let zip_bar = (
-        <div className="row justify-content-center">
-        <div className="col-md-6 my-1">
-          <Input
-            className={""}
+      <div>
+
+    <div className="row justify-content-center">
+        <div className="col-md-8 col-9 my-1">
+          <input
+            className={classes.zip_input + " pl-3"}
             id="zipcode_input"
             placeholder="Zip Code"
             onKeyUp={tryZip}
           />
         </div>
-        <div className="col-md-2 my-1 ">
-          <Button
-            className={classes.btn + " "}
-            type="primary"
-            onClick={onSearchZip}
-          >
-            {" "}
-            Search{" "}
-          </Button>
-        </div>
+      </div>
       </div>
 
+    )
+
+
+    // TODO:
+    // This is for the mobile version.
+    // On the desktop version, we should put the done_button BELOW the search bar
+    // and give it a hover effect.
+    let done_button = (
+      <div className={classes.btn_container + " mt-3 pr-3"}>
+      <div
+        className={classes.doneBtn + " "}
+        onClick={onSearchZip}
+      >
+        Done{" "}
+      </div>
+    </div>
     )
 
 
 
     return (
         <div>
-
+        {done_button}
         {top_text}
         {zip_bar}
         </div>

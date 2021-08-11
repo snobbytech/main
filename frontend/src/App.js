@@ -138,17 +138,6 @@ function App(props) {
           className="container mt-auto pt-4 pb-2"
           style={{ textAlign: "center", background: "#fff", color: "gray" }}
         >
-          <Space size={spacersize}>
-            <div>
-              <a
-                href="mailto:itsdchen@gmail"
-                className={classes.footerlettering + " dlinks"}
-              >
-                Contact
-              </a>{" "}
-            </div>
-            <div></div>
-          </Space>
         </footer>
       </body>
     </Layout>
