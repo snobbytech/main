@@ -121,6 +121,11 @@ function App(props) {
                     exact
                     render={(props) => <UserPage {...props} />}
                   />
+                  <Route
+                    path="/startcheckout"
+                    exact
+                    render={(props) => <StartCheckout {...props} />}
+                  />
 
 
 

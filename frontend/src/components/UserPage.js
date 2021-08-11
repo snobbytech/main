@@ -74,6 +74,13 @@ function OneDish(props) {
 
         // Redirects you to the checkout page for this dish.
         //console.log("Well, this was clicked, so you can actually... redirect now.")
+
+        // I should also
+        history.push({
+            pathname: "/startcheckout",
+
+        })
+
     }
 
     let internal = '';
