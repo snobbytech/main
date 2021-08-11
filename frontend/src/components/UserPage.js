@@ -55,7 +55,6 @@ const useStyles = makeStyles((theme) => ({
             border: "2px solid white",
             borderRadius: "50%",
             height: "150px",
-
           },
 
           profilefullname: {
@@ -82,9 +81,35 @@ const useStyles = makeStyles((theme) => ({
             lineHeight: "36px",
             letterSpacing: "-0.41px",
             color: "#111827",
+          },
+
+          dishcontainer: {
+              /* These shenanigans are basically so I can fight with the bootstrap grid.. */
+            paddingLeft: "15px",
+            paddingRight: "5px",
+          },
+
+          dishphoto: {
+            height: "200px",
+            width:"100%",
+            objectFit: "cover",
+            borderRadius: "10px",
+          },
+
+        dishdescription: {
+            display: "flex",
+            textAlign: "center",
+            fontFamily: "Quicksand, sans-serif",
+            fontSize: "12px",
+            letterSpacing: "-0.0041em",
+            color: "#111827",
 
 
-          }
+        },
+        innerdishdescription: {
+            width: "90%",
+        }
+
     },
   }));
 
@@ -120,22 +145,25 @@ function OneDish(props) {
     // Easy thing.
     // photo,
     if (props.dish) {
-        internal = (
-            <div>
-                <img className={classes.profilephoto}
+        return (
+            <div onClick={onSelect} className={ "col-6 " + classes.dishcontainer + " my-1"}>
+                <div className=" px-1">
+                <img className={classes.dishphoto}
                 src={props.dish.main_photo}
                 />
-                <div>
-                    {props.dish.name} ${props.dish.price}
-                </div>
 
+                </div>
+                <div className={classes.dishdescription}>
+                <div className={classes.innerdishdescription}>
+                    {props.dish.name}
+                    </div>
+                </div>
             </div>
         )
     }
 
     return (
-        <div onClick={onSelect}>
-            {internal}
+        <div >
         </div>
     )
 }
@@ -158,7 +186,7 @@ function DishArray(props) {
         // We will
 
         childDishes = (
-            <div>
+            <div className={ " row px-1"}>
                 {
                     props.dishes.map((oneDish, index) => {
                         // Something simple.
@@ -309,7 +337,7 @@ function UserPage(props) {
 
         personal_section = (
             <div className="row justify-content-center">
-            <div className="col-md-5 col-5 my-1">
+            <div className="col-md-5 col-5 my-2">
 
             <div className={classes.profilephotocontainer}>
                 {photo_elt}
@@ -337,12 +365,8 @@ function UserPage(props) {
     // This should be set after
     let dishes_section = '';
     if (faveDishes) {
-
         dishes_section = (<DishArray dishes={faveDishes} />)
     }
-
-
-
 
     return (
 
