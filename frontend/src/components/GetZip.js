@@ -138,7 +138,7 @@ function GetZip(props) {
     let top_text = (
         <div className="row justify-content-center my-2">
         <div className={classes.zip_text + " col-md-8 col-9 my-1"}>
-        I want dishes near...
+        Show dishes near...
     </div>
     </div>
     )
@@ -147,7 +147,7 @@ function GetZip(props) {
       <div>
 
     <div className="row justify-content-center">
-        <div className="col-md-8 col-9 my-1">
+        <div className="col-md-8 col-9 my-2">
           <input
             className={classes.zip_input + " pl-3"}
             id="zipcode_input"
