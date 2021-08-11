@@ -36,6 +36,14 @@ Basic page showing an influencer, their likes/stuff, and then the foods they pro
 const useStyles = makeStyles((theme) => ({
     ...universal_styles,
     ...{
+        coverphotocontainer: {
+        },
+        coverphoto: {
+            height: "443px",
+            width:"100%",
+            objectFit: "cover",
+        },
+
         profilephoto: {
             // flexShrink: 0,
             "@media (max-width: 520px)": {
@@ -251,11 +259,22 @@ function UserPage(props) {
         })
     }
 
+
+
     let personal_section = '';
+    let cover_photo = '';
 
     // Only two things are:
     //
     if (userInfo) {
+
+        cover_photo = (
+            <div className={classes.coverphotocontainer}>
+            <img className={classes.coverphoto} src={userInfo.cover_path} />
+
+            </div>
+        )
+
         let photo_elt = (
             <img
                   className={classes.profilephoto}
@@ -298,9 +317,11 @@ function UserPage(props) {
 
 
 
+
     return (
 
         <div>
+        {cover_photo}
         {personal_section}
         {dishes_section}
         </div>

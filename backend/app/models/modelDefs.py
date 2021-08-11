@@ -77,6 +77,9 @@ class User(ModelBase):
     # Path to their profile photo.
     avatar_path   = Column(String)
 
+    # This is like the facebook cover photo.
+    cover_path    = Column(String)
+
     # This is
     is_influencer = Column(Boolean, default=False)
 
@@ -121,6 +124,8 @@ class User(ModelBase):
 
         if 'avatar_path' in props:
             self.avatar_path = props['avatar_path']
+        if 'cover_path' in props:
+            self.cover_path = props['cover_path']
 
         if 'is_influencer' in props:
             self.is_influencer = bool(props['is_influencer'])
@@ -162,7 +167,7 @@ class User(ModelBase):
 
     # Stuff that the average person should be able to see.
     def public_fields(self):
-        return ['id', 'display_name', 'first_name', 'last-name', 'phone', 'last_lat', 'last_lon', 'last_zip', 'avatar_path', 'is_influencer', 'num_posts', 'num_followers']
+        return ['id', 'display_name', 'first_name', 'last-name', 'phone', 'last_lat', 'last_lon', 'last_zip', 'avatar_path', 'cover_path', 'is_influencer', 'num_posts', 'num_followers']
 
 
 # This is different from a post. This is more of a list of dishes that a normal user has

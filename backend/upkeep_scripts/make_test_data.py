@@ -118,6 +118,7 @@ def populate_dev():
             'last_lat': '40.7',
             'last_lon': '-74',
             'avatar_path': 'https://cdn.igblade.com/platform-cache/accounts/282268/profile-picture.jpg',
+            'cover_path': 'https://i.redd.it/l69k8t3php751.jpg',
             'is_influencer': True,
             'num_posts': 5,
             'num_followers': 100,
@@ -135,6 +136,7 @@ def populate_dev():
             'last_lon': '-74',
             # I grabbed thsi... urgh.
             'avatar_path': 'https://media-exp1.licdn.com/dms/image/C4E03AQGXiMoCqqZIJg/profile-displayphoto-shrink_400_400/0/1613672787216?e=1634169600&v=beta&t=ZgfY1HpaUdXY6AdyoPQp-kac6SiwmckGa8GHBp1N_k0',
+            'cover_path': 'https://i.redd.it/7wyyv8kdh7s31.jpg',
             'is_influencer': True,
             'num_posts': 3,
             'num_followers': 10,
