@@ -39,24 +39,21 @@ const useStyles = makeStyles((theme) => ({
         coverphotocontainer: {
         },
         coverphoto: {
-            height: "443px",
+            height: "243px",
             width:"100%",
             objectFit: "cover",
         },
 
+        profilephotocontainer: {
+            marginTop: "-75px",
+        },
+
         profilephoto: {
             // flexShrink: 0,
-            "@media (max-width: 520px)": {
-              margin: "0px",
-              maxWidth: "100%",
-              borderRadius: "7px",
-            },
-            "@media (min-width: 520px)": {
-              objectFit: "cover",
-              height: "400px",
-              maxWidth: "100%",
-              borderRadius: "7px",
-            },
+            border: "2px solid white",
+            borderRadius: "50%",
+            height: "150px",
+
           },
 
 
@@ -284,9 +281,9 @@ function UserPage(props) {
 
         personal_section = (
             <div className="row justify-content-center">
-            <div className="col-md-6 my-1">
+            <div className="col-md-5 col-5 my-1">
 
-            <div>
+            <div className={classes.profilephotocontainer}>
                 {photo_elt}
             </div>
 
