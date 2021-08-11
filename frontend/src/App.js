@@ -8,6 +8,8 @@ import { Typography } from "antd";
 
 import { auth } from "./base";
 import "antd/dist/antd.css";
+
+import "./Central.css";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import history from "./history.js";
 

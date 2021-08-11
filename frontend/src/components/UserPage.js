@@ -12,6 +12,7 @@ import {
   PercentageOutlined,
 } from "@ant-design/icons";
 import amplitude from "amplitude-js";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import { Tooltip } from "antd";
 import HelpOutline from "@material-ui/icons/HelpOutline";
@@ -46,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
         profilephotocontainer: {
             marginTop: "-75px",
+            textAlign: "center",
         },
 
         profilephoto: {
@@ -56,7 +58,33 @@ const useStyles = makeStyles((theme) => ({
 
           },
 
+          profilefullname: {
+              textAlign: "center",
+              fontFamily: "Quicksand, sans-serif",
+              fontStyle: "normal",
+              fontWeight: "bold",
+              fontSize: "18px",
+              lineHeight: "24px",
+              letterSpacing: "-0.0041em",
+              color: "#111827",
+          },
+          profilecheckmark: {
+            fontSize: '16px',
+            marginBottom: "2px",
+          },
 
+          profiledisplayname: {
+            textAlign: "center",
+            fontFamily: "Dancing Script",
+            fontStyle: "normal",
+            fontWeight: "normal",
+            fontSize: "30px",
+            lineHeight: "36px",
+            letterSpacing: "-0.41px",
+            color: "#111827",
+
+
+          }
     },
   }));
 
@@ -287,11 +315,12 @@ function UserPage(props) {
                 {photo_elt}
             </div>
 
-            <div>
-                {userInfo.display_name}
+            <div className={classes.profilefullname} >
+                {userInfo.first_name} {userInfo.last_name} <CheckCircleIcon htmlColor="#3B62EA" className={classes.profilecheckmark} style={{}}/>
             </div>
-            <div>
-                {userInfo.first_name} {userInfo.last_name}
+
+            <div className={classes.profiledisplayname}>
+                {userInfo.display_name}
             </div>
 
 
