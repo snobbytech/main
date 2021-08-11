@@ -1,0 +1,21 @@
+// change the theme
+$theme-colors: (
+  "primary": #3597ff,
+  "danger": #ff4136,
+);
+
+.btn-dotted {
+  min-width: "100%";
+  justify-content: "center";
+  text-transform: "none";
+  letter-spacing: "-.012em";
+  font-size: "1rem";
+  border-radius: "10px";
+  box-shadow: "none";
+  height: "48px!important";
+  background: #fff;
+  border-style: dashed;
+}
+
+// Import Bootstrap and its default variables
+@import "~bootstrap/scss/bootstrap";

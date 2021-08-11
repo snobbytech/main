@@ -41,6 +41,8 @@ Also, to start: making all these GETS, but eventually will move things to POST.
 
 """
 
+std_err = 'We hit an error in the server. It was logged'
+std_fail_dict = {'success': False, 'msg': std_err}
 
 @flask_app.route('/')
 def index():
@@ -48,111 +50,150 @@ def index():
 
 # Probably don't need a full address solution yet.
 # Verified works.
-@flask_app.route("/zip_to_latlon", methods=['GET'])
+@flask_app.route("/zip_to_latlon", methods=['POST'])
 def zip_to_latlon():
 
     # Usually, request.form['zip']
-    zipCode = '10011'
-    latlon = tools.decode_zip(zipCode)
-    return jsonify(latlon)
+    #zipCode = '10011'
+    zipCode = request.form['zip']
+    latlon = {}
+    try:
+        latlon = tools.decode_zip(zipCode)
+    except Exception as e:
+        traceback.print_exc()
+        # Best thing is to log this with a traceback.
+        return jsonify(std_fail_dict)
+
+    # TODO: it's probably easier on both ends if I just return some weird like error codes instead of
+    # jsonifying these success bools. Big todo then to simplify this chain.
+    return jsonify({'success': True, 'latlon': latlon})
 
 # Verified works.
-@flask_app.route("/get_influencer_public", methods=['GET'])
-def get_influencer_public():
-
+@flask_app.route("/get_influencer_info", methods=['POST'])
+def get_influencer_info():
     #
+    print("Hi, I ran here")
+    print(request)
     # usually, request.form['influencer_name']
-    influencer_name = 'fionaeats365'
-    influencer_obj = mt.get_user(display_name=influencer_name)
-    if influencer_obj:
-        influencer_dict = to_public_dict(influencer_obj)
-        return jsonify(influencer_dict)
+    influencer_dict = {}
+    try:
+        influencer_username = request.form['influencer_username']
+        #influencer_name = 'fionaeats365'
+        influencer_obj = mt.get_user(display_name=influencer_username)
+        if influencer_obj:
+            print("Herro")
+            influencer_dict = to_public_dict(influencer_obj)
 
-    # Failure mode.
-    return {}
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+
+    print("About to return")
+    print(influencer_dict)
+    return jsonify({'success': True, 'info_dict': influencer_dict})
+
 
 # Has option of restricting by location too.
 # Verified works.
-@flask_app.route("/get_influencer_dishes", methods=['GET'])
+@flask_app.route("/get_influencer_dishes", methods=['POST'])
 def get_influencer_dishes():
 
-    influencer_name = 'fionaeats365'
-    # Again, usually populated from request form.
-    dishes = mt.get_dishes_for_user(influencerName=influencer_name)
-
     all_dishes = []
-    for one_dish in dishes:
-        all_dishes.append(to_public_dict(one_dish))
-    return jsonify(all_dishes)
+    try:
+        influencer_name = request.form['influencer_name']
+        # Again, usually populated from request form.
+        dishes = mt.get_dishes_for_user(influencerName=influencer_name)
+
+        for one_dish in dishes:
+            all_dishes.append(to_public_dict(one_dish))
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    return jsonify({'success': True, 'dishes': all_dishes})
 
 
 # Verified works.
-@flask_app.route("/get_influencer_dishes_area", methods=['GET'])
+@flask_app.route("/get_influencer_dishes_area", methods=['POST'])
 def get_influencer_dishes_area():
-    influencer_name = 'fionaeats365'
-    # in miles.
-    radius = 5
-    zipCode = '10011'
-
-    latlons = tools.decode_zip(zipCode)
-    influencer = mt.get_user(display_name=influencer_name)
-    print(latlons)
-    local_dishes = mt.get_influencer_local_dishes(userId=influencer.id,
-                                                  lat=latlons['lat'],
-                                                  lon=latlons['lon'],
-                                                  milesRadius=radius)
-
-
-    # We should probably get the restaurants too? Maybe in teh future at least.
     all_dishes = []
-    for one_dish in local_dishes:
-        all_dishes.append(to_public_dict(one_dish))
+    try:
+        influencer_name = request.form['influencer_name']
+        # in miles.
+        radius = 5
+        zipCode = request.form['zip_code']
 
-    return jsonify(all_dishes)
+        latlons = tools.decode_zip(zipCode)
+        influencer = mt.get_user(display_name=influencer_name)
+        local_dishes = mt.get_influencer_local_dishes(userId=influencer.id,
+                                                      lat=latlons['lat'],
+                                                      lon=latlons['lon'],
+                                                      milesRadius=radius)
+
+        # We should probably get the restaurants too? Maybe in teh future at least.
+        for one_dish in local_dishes:
+            all_dishes.append(to_public_dict(one_dish))
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    #print("So my all_dishes is like ", all_dishes)
+    return jsonify({'success': True, 'all_dishes': all_dishes})
 
 # Verified works.
-@flask_app.route("/get_dish_info", methods=['GET'])
+@flask_app.route("/get_dish_info", methods=['POST'])
 def get_dish_info():
 
+    dish_dict = {}
     # Pretty simple thing, eh?
-    dish_name = 'Fried Chicken and Waffles'
-    one_dish = mt.get_dish_with_name(dish_name)
+    try:
+        dish_id = request.form['dish_id']
 
-    # Uhh, I guess then I... do it?
-    if one_dish:
-        return jsonify(to_public_dict(one_dish))
-    return None
+        #dish_name = 'Fried Chicken and Waffles'
+        one_dish = mt.get_dish(dish_id)
+
+        # Uhh, I guess then I... do it?
+        if one_dish:
+            dish_dict = to_public_dict(one_dish)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    return jsonify({'success': True, 'dish': dish_dict})
 
 # Verified works.
-@flask_app.route("/get_restaurant_info", methods=['GET'])
+@flask_app.route("/get_restaurant_info", methods=['POST'])
 def get_restaurant_info():
 
-    # Needs to be lowercase, remember.
-    restaurant_name = 'cafeteria'
-    # Really, should be getting this from a restaurant_id or a name-and-internal thing
-    # or something.
-    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
+    restaurant_dict = {}
+    try:
+        restaurant_urlname = request.form['urlname']
+        restaurant = mt.get_restaurant_from_urlname(restaurant_urlname)
+        restaurant_dict = to_public_dict(restaurant)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+
+    return jsonify({'success': True, 'restaurant': restaurant_dict})
 
 
-    return jsonify(to_public_dict(the_restaurant))
-
-
-@flask_app.route("/get_restaurant_dishes", methods=['GET'])
+@flask_app.route("/get_restaurant_dishes", methods=['POST'])
 def get_restaurant_dishes():
 
-    restaurant_name = 'cafeteria'
-    the_restaurant = mt.get_restaurant_from_urlname(restaurant_name)
-
-    # Now get dishes
-    the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)
     all_dishes = []
-    for one_dish in the_dishes:
-        all_dishes.append(to_public_dict(one_dish))
+    try:
+        restaurant_urlname = request.form['urlname']
+        the_restaurant = mt.get_restaurant_from_urlname(restaurant_urlname)
 
-    return jsonify(all_dishes)
+        # Now get dishes
+        the_dishes = mt.get_dishes_for_restaurant(the_restaurant.id)
+        for one_dish in the_dishes:
+            all_dishes.append(to_public_dict(one_dish))
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
+    return jsonify({'success': True, 'dishes': all_dishes})
 
 # Returns a dict...
-@flask_app.route("/get_dish_payment", methods=['GET'])
+# OK, this is not as necessary right now.
+@flask_app.route("/get_dish_payment", methods=['POST'])
 def get_dish_payment():
 
     dish_name = 'Fried Chicken and Waffles'

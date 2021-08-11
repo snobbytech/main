@@ -1,0 +1,12 @@
+/*
+  Note: This is slightly different from App.css and index.css, but I'm not sure
+  exactly where either are used right now. So I'm using this right now as a dumping
+  ground for me to be able to download google fonts.
+
+  Following the css guidance from here:
+  https://stackoverflow.com/questions/40769551/how-to-use-google-fonts-in-react-js
+*/
+@import url('https://fonts.googleapis.com/css?family=Dancing+Script');
+@import url('https://fonts.googleapis.com/css?family=Quicksand');
+@import url('https://fonts.googleapis.com/css?family=Poppins');
+
