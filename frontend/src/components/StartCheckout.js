@@ -33,6 +33,56 @@ var USING_URL = process.env.REACT_APP_BACKEND_URL;
 const useStyles = makeStyles((theme) => ({
     ...universal_styles,
     ...{
+        dishname: {
+            fontFamily: "Quicksand",
+            fontStyle: "normal",
+            fontWeight: "bold",
+            fontSize: "16px",
+            lineHeight: "24px",
+            display: "flex",
+            alignItems: "center",
+            letterSpacing: "-0.0041em",
+
+            color: "#111827",
+        },
+
+        dishphoto: {
+            width:"100%",
+            objectFit: "cover",
+            borderRadius: "8px",
+          },
+
+          deliveryrestaurantheader: {
+            textAlign: "center",
+            fontFamily: "Quicksand, sans-serif",
+            fontStyle: "normal",
+            fontWeight: "bold",
+            fontSize: "16px",
+            lineHeight: "20px",
+            letterSpacing: "-0.0041em",
+            color: "#111827",
+
+          },
+
+          deliveryrestaurantaddress: {
+            textAlign: "center",
+            fontFamily: "Quicksand, sans-serif",
+            fontStyle: "normal",
+            fontSize: "12px",
+            letterSpacing: "-0.0041em",
+            color: "#111827",
+          },
+
+          orderprice: {
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "600",
+            fontSize: "14px",
+            lineHeight: "17px",
+            /* identical to box height */
+            letterSpacing: "-0.0041em",
+            color: "#EDBC0E",
+          }
 
     }
     }));
@@ -53,22 +103,23 @@ function StartCheckout(props) {
     const history = useHistory();
 
     const [dishInfo, setDishInfo] = useState({});
+    const [restaurantInfo, setRestaurantInfo] = useState({});
     // Contains and explains all the partial charges we'll have in order
     // placement.
     const [preOrderInfo, setPreOrderInfo] = useState({});
 
-    const [address, setAddress] = useState({});
+    // When we update the preOrderInfo, we'll have to also update the stripeSecret.
+    const [stripeSecret, setStripeSecret] = useState("");
 
-    // This is the part where we have to ask the backend how much the
-    // freaking thing was.
-    const [subtotal, setSubtotal] = useState({});
+
+    // Hmm,
+    const [address, setAddress] = useState({});
 
 
     // Probably/maybe will have some issues here.
     const [err, setErr] = useState("");
 
     useEffect(() => {
-        return;
         // At the start of the flow, we talk to the server and get info for the dish.
 
         // OK, so what is the dish?
@@ -77,9 +128,12 @@ function StartCheckout(props) {
 
         let dish_data = new FormData();
         dish_data.set("dish_id", dish_id);
+        // TODO: read this in from memory or something.
+        dish_data.set("source_influencer", "");
+
 
         // Grab both the dish and calculate its payment info.
-        let preorder_url = new URL(USING_URL + "/get_preorder_dict");
+        let preorder_url = new URL(USING_URL + "/get_dish_order_details");
         fetch(preorder_url, {
             method: "POST",
             body: dish_data
@@ -88,8 +142,9 @@ function StartCheckout(props) {
                 response.json().then((data) => {
                     if (data.success) {
                         // Then we can start grabbing the response types, yeah?
-                        //setDishInfo(data.dish_info);
-                        //setDishOrderInfo(data.preorder_info);
+                        setDishInfo(data.dish_dict);
+                        setPreOrderInfo(data.order_dict);
+                        setRestaurantInfo(data.restaurant_dict);
                     }
                 })
             }
@@ -100,24 +155,89 @@ function StartCheckout(props) {
 
     }, [])
 
+    useEffect(() => {
+        setStripeSecret("");
+        if (Object.keys(preOrderInfo).length > 0) {
+            // Make a request to the backend
+            // IMMEDIATE TODO: implement this.
+
+            //fetchStripeSecret();
+        }
+
+    }, [preOrderInfo])
+
     // Make sure that the address is correct and that we can deliver.
     const validateAddress = () => {
 
     }
 
 
-    // Not implementing this yet, but
+    // Not implementing this yet, but o well.
     const submitOrder = () => {
+
+    }
+
+    //
+    const fetchStripeSecret = () => {
+
+    }
+
+
+    let restaurantSection = '';
+    if (Object.keys(restaurantInfo).length) {
+        //
+        restaurantSection = (
+            <div className=" mt-3">
+
+            <div className="row justify-content-center">
+                <div className={ classes.deliveryrestaurantheader + " col-md-6 col-9 "}>
+                    Delivery from {restaurantInfo.name}
+                </div>
+            </div>
+
+            <div className="row justify-content-center">
+                <div className={classes.deliveryrestaurantaddress + " col-md-6 col-9"}>
+                    {restaurantInfo.street_address + " | " + restaurantInfo.phone}
+                </div>
+            </div>
+        </div>
+        )
+    }
+
+
+    let dishSection = '';
+    if (Object.keys(dishInfo).length && Object.keys(restaurantInfo).length) {
+        // Then we can create some divs and stuff.
+        dishSection = (
+            <div className="row mt-4 px-3">
+            <div className="col-md-4 col-4">
+                <img className={classes.dishphoto}
+                    src={dishInfo.main_photo}
+                />
+            </div>
+
+            <div className="col-md-8 col-8">
+                <div className={classes.dishname}>
+                    {dishInfo.name}
+                </div>
+                <div className={""}>
+                    <span className={classes.orderprice}>${dishInfo.price}</span>
+                </div>
+
+            </div>
+
+            </div>
+        )
+
 
     }
 
 
     // This is the top part.
-    let checkoutInfo = '';
+    let checkoutSection = '';
     if (dishInfo &&  preOrderInfo) {
-        checkoutInfo = (
+        checkoutSection = (
             <div>
-                This can be a thing.
 
             </div>
 
@@ -131,23 +251,94 @@ function StartCheckout(props) {
     // Street address
     // phone number
     let addressForm = (
-        <div>
+        <div className="px-2">
             <Form>
-              <Form.Group controlId="name">
-              <Form.Label>Name</Form.Label>
-                <Form.Control
-                  placeholder="Your Name"
-                  controlId="name"
-                />
-            </Form.Group>
+            <div className="row">
+                <div className="col-10">
+                  <Form.Group controlId="name">
+                  <Form.Label>Name</Form.Label>
+                    <Form.Control
+                    placeholder="Your Name"
+                    controlId="name"
+                    />
+                </Form.Group>
+              </div>
 
-            <Form.Group controlId="street address">
+            </div>
+            <div className="row">
+                <div className="col-md-6 col-10">
+
+            <Form.Group controlId="streetaddress">
               <Form.Label>Street Address</Form.Label>
                 <Form.Control
                   placeholder="Full Street Address"
                   controlId="streetaddress"
                 />
             </Form.Group>
+            </div>
+            </div>
+
+            <div className="row">
+            <div className="col-md-2 col-4">
+
+            <Form.Group controlId="aptnumber">
+              <Form.Label>Unit no.</Form.Label>
+                <Form.Control
+                  placeholder="Unit #"
+                  controlId="aptnumber"
+                />
+            </Form.Group>
+
+            </div>
+            </div>
+
+
+            <div className="row">
+                <div className="col-md-6 col-10">
+
+            <Form.Group controlId="city">
+              <Form.Label>City</Form.Label>
+                <Form.Control
+                  placeholder="City"
+                  controlId="city"
+                />
+            </Form.Group>
+
+            </div>
+            </div>
+
+            <div className="row">
+            <div className="col-md-2 col-4">
+
+            <Form.Group controlId="state">
+              <Form.Label>State</Form.Label>
+                <Form.Control
+                  placeholder="State"
+                  controlId="state"
+                />
+            </Form.Group>
+
+            </div>
+
+            </div>
+
+            <div className="row">
+            <div className="col-md-4 col-4">
+            <Form.Group controlId="zip">
+              <Form.Label>Zip</Form.Label>
+                <Form.Control
+                  placeholder="Zip Code"
+                  controlId="zip"
+                />
+            </Form.Group>
+            </div>
+
+            </div>
+
+
+            <div className="row">
+            <div className="col-md-2 col-10">
+
 
             <Form.Group controlId="phone">
               <Form.Label>Phone Number</Form.Label>
@@ -156,6 +347,9 @@ function StartCheckout(props) {
                   controlId="phone"
                 />
             </Form.Group>
+            </div>
+            </div>
+
             </Form>
         </div>
     )
@@ -166,9 +360,11 @@ function StartCheckout(props) {
     // notify me?
     // This is
     let deliveryInstructionsForm = (
-        <div>
+        <div className="px-2">
 
             <Form>
+            <div className="row">
+                <div className="col-10">
 
             <Form.Group controlId="phone">
               <Form.Label>Delivery Instructions</Form.Label>
@@ -177,12 +373,13 @@ function StartCheckout(props) {
                   controlId="delivery_instructions"
                 />
             </Form.Group>
+            </div>
+            </div>
 
             </Form>
         </div>
 
     )
-
 
     // This is like... the stripe form.
 
@@ -218,9 +415,16 @@ function StartCheckout(props) {
     return (
         <div>
 
-            {checkoutInfo}
+            {restaurantSection}
+            {dishSection}
+            <div className="mt-4" >
+
+            <hr />
+            </div>
+
             {addressForm}
             {deliveryInstructionsForm}
+
             {payForm}
         </div>
     )

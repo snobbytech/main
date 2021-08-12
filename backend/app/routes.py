@@ -225,15 +225,19 @@ def get_dish_payment():
 
 
         # This will be changed after they put in more stuff.
-        order_dict['total_cost'] = ret_dict['subtotal'] + ret_dict['local_tax'] + ret_dict['delivery'] + ret_dict['our_fees'] + ret_dict['tip'] + ret_dict['dasher_tip']
+        order_dict['total_cost'] = order_dict['subtotal'] + order_dict['local_tax'] + order_dict['delivery'] + order_dict['our_fees'] + order_dict['tip'] + order_dict['dasher_tip']
 
         # Could be nobody too.
-        order_dict['source_influencer'] = request.form['source_influencer']
+        if 'source_influencer' in request.form:
+            order_dict['source_influencer'] = request.form['source_influencer']
+        else:
+            order_dict['source_influencer'] = ''
+
         order_dict['restaurant_id'] = the_dish.restaurant_id
 
 
         # Get the restaurant too.
-        the_restaurant = get_restaurant(the_dish.restaurant_id)
+        the_restaurant = mt.get_restaurant(the_dish.restaurant_id)
         restaurant_dict = to_public_dict(the_restaurant)
 
         dish_dict = to_public_dict(the_dish)

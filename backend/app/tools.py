@@ -73,8 +73,7 @@ stripe account.
 """
 
 LIVEKEY = ''
-TESTKEY = 'sk_test_51HtkfVI5P0GyTyGvnYuTVQudtwJGXOmyPc4E7zamtEZGyirSqN7eYN76LSofjPHECce1prlzHp0IOqyJP
-F6Dsvsa00hXf2atuI'
+TESTKEY = 'sk_test_51HtkfVI5P0GyTyGvnYuTVQudtwJGXOmyPc4E7zamtEZGyirSqN7eYN76LSofjPHECce1prlzHp0IOqyJPF6Dsvsa00hXf2atuI'
 
 LIVEDOMAIN = ''
 TESTDOMAIN = 'http://localhost:3000'

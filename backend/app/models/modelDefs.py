@@ -364,7 +364,7 @@ class Restaurant(ModelBase):
         return (True, "")
 
     def public_fields(self):
-        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
+        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'street_address', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
 
 # A single order.
 class Order(ModelBase):
