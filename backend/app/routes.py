@@ -191,45 +191,77 @@ def get_restaurant_dishes():
         return jsonify(std_fail_dict)
     return jsonify({'success': True, 'dishes': all_dishes})
 
-# Returns a dict...
+# What this does: given a dish, retrieve relevant information, figure out subtotals and stuff,
+# and return it all to the frontend so they can place an order.
+#
 # OK, this is not as necessary right now.
-@flask_app.route("/get_dish_payment", methods=['POST'])
+@flask_app.route("/get_dish_order_details", methods=['POST'])
 def get_dish_payment():
 
-    dish_name = 'Fried Chicken and Waffles'
-    the_dish = mt.get_dish_with_name(dish_name)
-
-
     ret_dict = {}
-    ret_dict['subtotal'] = the_dish.price
+    try:
+        #dish_name = 'Fried Chicken and Waffles'
 
-    # TODO SOON: get an actual tax calculator for the actual thing.
-    # Goign to take the worst case scenario for californian restaurants.
-    ret_dict['local_tax'] = the_dish.price *0.1025
+        the_dish = mt.get_dish(request.form['dish_id'])
+
+        order_dict = {}
+        order_dict['subtotal'] = the_dish.price
+        # TODO SOON: get an actual tax calculator for the actual thing.
+        # Goign to take the worst case scenario for californian restaurants.
+        order_dict['local_tax'] = the_dish.price *0.1025
+
+        # Let's assume this? TODO: do more.
+        order_dict['delivery'] = 7.00
+
+        # I guess we can make our own fees too.
+        order_dict['our_fees'] = the_dish.price * 0.15
+
+        # This is set in the frontend and we'll have to update it.
+        # TODO: let the user tip the restaurant
+        order_dict['tip'] = 0.
+
+        # TODO: let the user tip the dasher.
+        order_dict['dasher_tip'] = 0.
 
 
-    # Let's assume this?
-    ret_dict['delivery'] = 7.00
+        # This will be changed after they put in more stuff.
+        order_dict['total_cost'] = ret_dict['subtotal'] + ret_dict['local_tax'] + ret_dict['delivery'] + ret_dict['our_fees'] + ret_dict['tip'] + ret_dict['dasher_tip']
 
-    # I guess we can make our own fees too.
-    ret_dict['our_fees'] = the_dish.price * 0.15
-
-    # TODO: let the user tip the restaurant
-    ret_dict['tip'] = 0.
+        # Could be nobody too.
+        order_dict['source_influencer'] = request.form['source_influencer']
+        order_dict['restaurant_id'] = the_dish.restaurant_id
 
 
-    # TODO: let the user tip the dasher.
-    ret_dict['dasher_tip'] = 0.
+        # Get the restaurant too.
+        the_restaurant = get_restaurant(the_dish.restaurant_id)
+        restaurant_dict = to_public_dict(the_restaurant)
 
+        dish_dict = to_public_dict(the_dish)
 
-    ret_dict['total_cost'] = ret_dict['subtotal'] + ret_dict['local_tax'] + ret_dict['delivery'] + ret_dict['our_fees'] + ret_dict['tip'] + ret_dict['dasher_tip']
+        ret_dict['success']         = True
+        ret_dict['order_dict']      = order_dict
+        ret_dict['restaurant_dict'] = restaurant_dict
+        ret_dict['dish_dict']       = dish_dict
 
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
 
     # OK, is it fair? I dont know.
     return jsonify(ret_dict)
 
 
     # Basically we do a calculation of fees.
+
+@flask_app.route("/get_stripesecret_for_order", methods=['POST'])
+def get_stripesecret_for_order():
+    try:
+        # This is in dollars.
+        amt = float(request.form['amount'])
+        stripe_secret = tools.get_stripe_secret(amt)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify(std_fail_dict)
 
 # This happens after the user pays. We grab the order and finalize it in our db.
 @flask_app.route("/finalize_create_order", methods=['GET'])
