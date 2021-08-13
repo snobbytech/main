@@ -21,6 +21,8 @@ import { Form, FormFile } from "react-bootstrap";
 
 import {Converter} from 'showdown';
 
+import StripePay from "./StripePay";
+
 import StarIcon from '@material-ui/icons/Star';
 import * as Sentry from "@sentry/react";
 import qs from 'qs';
@@ -386,6 +388,16 @@ function StartCheckout(props) {
     // To make it easy, I should suggest a 18% tip amount.
 
 
+    let stripe_block = (
+            <div>
+              <StripePay
+                validateBeforePayment={() => {}}
+
+                stripeSecret={stripeSecret}
+              />
+            </div>
+        );
+
     let payForm = '';
     payForm = (
         <div>
@@ -402,6 +414,7 @@ function StartCheckout(props) {
             Other Stripe stuff.
 
             </Form>
+        {stripe_block}
 
         </div>
     )

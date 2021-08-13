@@ -267,6 +267,8 @@ def get_stripesecret_for_order():
         traceback.print_exc()
         return jsonify(std_fail_dict)
 
+
+
 # This happens after the user pays. We grab the order and finalize it in our db.
 @flask_app.route("/finalize_create_order", methods=['GET'])
 def finalize_dish_order():
@@ -309,7 +311,13 @@ def finalize_dish_order():
     # Otherwise, we have bitter defeat.
     return None
 
-    pass
+# We call it after the stripe callback to tell the database it was paid for.
+@flask_app.route("/mark_order_paid", methods=['POST'])
+def mark_order_paid():
+
+    # Pretty simple, get the order of a certain id and mark it paid!
+    return ''
+
 
 # We have to grab the order and return its values, no biggie.
 @flask_app.route("/get_order_status", methods=['GET'])
