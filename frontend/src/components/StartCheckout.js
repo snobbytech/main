@@ -84,6 +84,110 @@ const useStyles = makeStyles((theme) => ({
             /* identical to box height */
             letterSpacing: "-0.0041em",
             color: "#EDBC0E",
+          },
+
+          tip: {
+            display: "inline-block",
+            width: "100px",
+            backgroundColor: "white",
+
+            /*  border: 1px solid #d6d6d6; */
+            border: "1px solid #E8E8E8",
+            borderRadius: "8px",
+            marginLeft: "5px",
+            marginRight: "5px",
+            padding: "15px",
+            cursor: "pointer",
+          },
+
+          tipselected: {
+            display: "inline-block",
+            width: "100px",
+            backgroundColor: "#FFFC00",
+            border: "1px solid #E8E8E8",
+            borderRadius: "5px",
+            marginLeft: "5px",
+            marginRight: "5px",
+            padding: "15px",
+            cursor: "pointer",
+          },
+
+          tipcontent: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            /* Added this line for cases where the package description cell-wraps.  */
+            textAlign: "center",
+
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "500",
+            fontSize: "12px",
+            lineHeight: "18px",
+            color: "#151E34",
+
+
+          },
+
+          tippercent: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            /* Added this line for cases where the package description cell-wraps.  */
+            textAlign: "center",
+
+
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "600",
+            fontSize: "16px",
+            lineHeight: "18px",
+            color: "#151E34",
+
+          },
+
+
+          pricelineitem: {
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "500",
+            fontSize: "14px",
+            lineHeight: "20px",
+            /* identical to box height, or 143% */
+            color: "#151E34",
+          },
+
+          pricelinevalue: {
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "500",
+            fontSize: "16px",
+            lineHeight: "20px",
+            /* identical to box height, or 125% */
+
+            textAlign: "right",
+
+            color: "#151E34",
+          },
+
+          totallabel: {
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "600",
+            fontSize: "14px",
+            lineHeight: "20px",
+            /* identical to box height, or 143% */
+            color: "#151E34",
+          },
+
+          totalprice: {
+            fontFamily: "SF Pro Display",
+            fontStyle: "normal",
+            fontWeight: "bold",
+            fontSize: "16px",
+            lineHeight: "20px",
+            textAlign: "right",
+            color: "#151E34",
           }
 
     }
@@ -167,6 +271,12 @@ function StartCheckout(props) {
         }
 
     }, [preOrderInfo])
+
+
+    const chooseTip= (tipAmt) => {
+        // Set the tip amount, recalculate the total, and ask for the stripe secret again.
+        // Also, set the chosenTip.
+    }
 
     // Make sure that the address is correct and that we can deliver.
     const validateAddress = () => {
@@ -408,29 +518,87 @@ function StartCheckout(props) {
 
         <div className="row">
             <div className="col-md-10 col-10">Food total</div>
-            <div className="col-md-2 col-2">{preOrderInfo.subtotal}</div>
+            <div className="col-md-2 col-2">${preOrderInfo.subtotal}</div>
         </div>
         <div className="row">
             <div className="col-md-10 col-10">Delivery Fee</div>
-            <div className="col-md-2 col-2">{preOrderInfo.delivery_fee}</div>
+            <div className="col-md-2 col-2">${preOrderInfo.delivery_fee}</div>
         </div>
         </>
+    )
+
+
+    // Make a tip portion.
+
+    // OK, this is really stupid to hardcode but I guess here I am.
+    let notip       = 0;
+    let fifteenperc = (preOrderInfo.subtotal * 0.15).toFixed(2);
+    let eighteenperc = (preOrderInfo.subtotal * 0.18).toFixed(2);
+
+      let noselectedclass = classes.tip;
+      let fifteenselectedclass = classes.tip;
+      let eighteenpercclass = classes.tip;
+      if (preOrderInfo.tip == notip) {
+        noselectedclass = classes.tipselected;
+      }
+      if (preOrderInfo.tip == fifteenperc) {
+        fifteenselectedclass = classes.tipselected;
+      }
+      if (preOrderInfo.tip == eighteenperc) {
+        eighteenpercclass = classes.tipselected;
+      }
+
+          let tipPortion = (
+          <div className="row">
+                <div
+                    className={  noselectedclass + " ml-2 mr-2 mt-1"}
+                    onClick={() => {
+                      chooseTip(notip);
+                    }}
+                  >
+                    <div className={classes.tippercent}>
+                      No tip
+                    </div>
+                    <div className={classes.tipcontent}>
+                      ${notip}
+                    </div>
+                  </div>
+
+                  <div
+                    className={  fifteenselectedclass + " ml-2 mr-2 mt-1"}
+                    onClick={() => {
+                      chooseTip(fifteenperc);
+                    }}
+                  >
+                    <div className={classes.tippercent}>
+                      15%
+                    </div>
+                    <div className={classes.tipcontent}>
+                    ${fifteenperc}
+                    </div>
+                  </div>
+
+                  <div
+                    className={  eighteenpercclass + " ml-2 mr-2 mt-1"}
+                    onClick={() => {
+                      chooseTip(notip);
+                    }}
+                  >
+                    <div className={classes.tippercent}>
+                      18%
+                    </div>
+                    <div className={classes.tipcontent}>
+                    ${eighteenperc}
+                    </div>
+                  </div>
+        </div>
     )
 
 
     payForm = (
         <div className="">
             {toPaySection}
-            <Form>
-            <Form.Group controlId="phone">
-              <Form.Label>Tip</Form.Label>
-                <Form.Control
-                  placeholder={"18% = " + " $3.20"}
-                  controlId="tip"
-                />
-            </Form.Group>
-
-            </Form>
+            {tipPortion}
             <div className="row">
             <div className="col-md-10 col-10">Total</div>
             <div className="col-md-2 col-2">{preOrderInfo.taxes}</div>

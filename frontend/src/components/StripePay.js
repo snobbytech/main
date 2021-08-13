@@ -49,10 +49,39 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
+const useStyles = makeStyles((theme) => ({
+  ...universal_styles,
+  ...{
+    checkoutbutton: {
+      background: "#FFFC00",
+      borderRadius: "15px",
+      paddingTop: "12px",
+      paddingBottom: "12px",
+
+      /* Font for the text*/
+      fontFamily: "SF Pro Display",
+      fontStyle: "normal",
+    fontWeight: "600",
+    fontSize: "16px",
+    lineHeight: "20px",
+    /* identical to box height, or 125% */
+
+    textAlign: "center",
+
+    /* Grey 900 */
+
+    color: "#111827",
+
+    },
+
+
+  }}));
+
 // A whole thing to do stripe payment
 function CheckoutForm(props) {
   const stripe = useStripe();
   const elements = useElements();
+  const classes = useStyles();
 
   // After we make the initial order request, we should get an id that lets us know
   // which order it is that we're trying to handle.
@@ -185,7 +214,7 @@ function CheckoutForm(props) {
   };
 
   let spinner_or_button =  (
-    <button className="btn btn-primary " disabled={!stripe}>Confirm order</button>
+    <div className={classes.checkoutbutton} disabled={!stripe}>Place order</div>
   );
   if (currentlyPaying) {
     spinner_or_button = (
@@ -220,10 +249,6 @@ function CheckoutForm(props) {
       <div className="stripe-checkout-form py-3">
         <form onSubmit={handlePayment}>
         <div className="">
-
-<label>
-  Payment Info
-  </label>
 <div className="bounded-box p-2">
   <CardElement options={CARD_ELEMENT_OPTIONS} />
 </div>
