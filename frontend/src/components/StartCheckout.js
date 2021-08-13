@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
 
           tip: {
             display: "inline-block",
-            width: "100px",
+            width: "80px",
             backgroundColor: "white",
 
             /*  border: 1px solid #d6d6d6; */
@@ -102,9 +102,8 @@ const useStyles = makeStyles((theme) => ({
 
           tipselected: {
             display: "inline-block",
-            width: "100px",
+            width: "80px",
             backgroundColor: "#FFFC00",
-            border: "1px solid #E8E8E8",
             borderRadius: "5px",
             marginLeft: "5px",
             marginRight: "5px",
@@ -119,14 +118,12 @@ const useStyles = makeStyles((theme) => ({
             /* Added this line for cases where the package description cell-wraps.  */
             textAlign: "center",
 
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "500",
             fontSize: "12px",
             lineHeight: "18px",
             color: "#151E34",
-
-
           },
 
           tippercent: {
@@ -137,7 +134,7 @@ const useStyles = makeStyles((theme) => ({
             textAlign: "center",
 
 
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "600",
             fontSize: "16px",
@@ -148,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
 
 
           pricelineitem: {
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "500",
             fontSize: "14px",
@@ -158,7 +155,7 @@ const useStyles = makeStyles((theme) => ({
           },
 
           pricelinevalue: {
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "500",
             fontSize: "16px",
@@ -171,7 +168,7 @@ const useStyles = makeStyles((theme) => ({
           },
 
           totallabel: {
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "600",
             fontSize: "14px",
@@ -181,13 +178,17 @@ const useStyles = makeStyles((theme) => ({
           },
 
           totalprice: {
-            fontFamily: "SF Pro Display",
+            fontFamily: "Source Sans Pro",
             fontStyle: "normal",
             fontWeight: "bold",
             fontSize: "16px",
             lineHeight: "20px",
             textAlign: "right",
             color: "#151E34",
+          },
+
+          payamountdivs: {
+            /* Not showing the background color as in the mock, because part of the layout looks bad here*/
           }
 
     }
@@ -276,6 +277,11 @@ function StartCheckout(props) {
     const chooseTip= (tipAmt) => {
         // Set the tip amount, recalculate the total, and ask for the stripe secret again.
         // Also, set the chosenTip.
+
+        let curPreOrder = {...preOrderInfo};
+        curPreOrder.tip = Number(tipAmt);
+        curPreOrder.total_cost = curPreOrder.subtotal + curPreOrder.delivery_fee + curPreOrder.local_tax + curPreOrder.tip;
+        setPreOrderInfo(curPreOrder);
     }
 
     // Make sure that the address is correct and that we can deliver.
@@ -521,6 +527,10 @@ function StartCheckout(props) {
             <div className="col-md-2 col-2">${preOrderInfo.subtotal}</div>
         </div>
         <div className="row">
+            <div className="col-md-10 col-10">Tax</div>
+            <div className="col-md-2 col-2">${preOrderInfo.local_tax}</div>
+        </div>
+        <div className="row">
             <div className="col-md-10 col-10">Delivery Fee</div>
             <div className="col-md-2 col-2">${preOrderInfo.delivery_fee}</div>
         </div>
@@ -549,7 +559,7 @@ function StartCheckout(props) {
       }
 
           let tipPortion = (
-          <div className="row">
+          <div className="row mb-3">
                 <div
                     className={  noselectedclass + " ml-2 mr-2 mt-1"}
                     onClick={() => {
@@ -558,9 +568,6 @@ function StartCheckout(props) {
                   >
                     <div className={classes.tippercent}>
                       No tip
-                    </div>
-                    <div className={classes.tipcontent}>
-                      ${notip}
                     </div>
                   </div>
 
@@ -581,7 +588,7 @@ function StartCheckout(props) {
                   <div
                     className={  eighteenpercclass + " ml-2 mr-2 mt-1"}
                     onClick={() => {
-                      chooseTip(notip);
+                      chooseTip(eighteenperc);
                     }}
                   >
                     <div className={classes.tippercent}>
@@ -597,12 +604,17 @@ function StartCheckout(props) {
 
     payForm = (
         <div className="">
-            {toPaySection}
             {tipPortion}
+
+            <div className={classes.payamountdivs }>
+            {toPaySection}
+
             <div className="row">
-            <div className="col-md-10 col-10">Total</div>
-            <div className="col-md-2 col-2">{preOrderInfo.taxes}</div>
+            <div className={classes.totallabel + " col-md-10 col-10"}>Total</div>
+            <div className={classes.totalprice + " col-md-2 col-2"}>{preOrderInfo.total_cost}</div>
             </div>
+            </div>
+
             {stripe_block}
 
         </div>

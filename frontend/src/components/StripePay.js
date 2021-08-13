@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
       paddingBottom: "12px",
 
       /* Font for the text*/
-      fontFamily: "SF Pro Display",
+      fontFamily: "Source Sans Pro",
       fontStyle: "normal",
     fontWeight: "600",
     fontSize: "16px",
@@ -282,6 +282,7 @@ function StripePay(props) {
   // TODO: CHANGE THIS.
   if (USING_URL != 'https://booktimeserver.xyz') {
     ccline = ' By the way the test cc number is 4000 0025 0000 3155';
+    ccline = '';
   }
 
   return (
