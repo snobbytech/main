@@ -49,21 +49,6 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-function CardSection() {
-  return (
-    <div className="">
-
-      <label>
-        Payment Info
-        </label>
-      <div className="bounded-box p-2">
-        <CardElement options={CARD_ELEMENT_OPTIONS} />
-      </div>
-    </div>
-  );
-};
-
-
 // A whole thing to do stripe payment
 function CheckoutForm(props) {
   const stripe = useStripe();
@@ -83,7 +68,7 @@ function CheckoutForm(props) {
   }, []);
 
   // TODO:
-  const makePaymentCall = async (formResponses) => {
+  const makePaymentCall = async () => {
     // Make a call to the backend that tells us the details of an order.
     let myForm = new FormData();
 
@@ -122,20 +107,8 @@ function CheckoutForm(props) {
     // Start the spinner
     setCurrentlyPaying(true);
 
-    // We first ask the parent to do a validation, before we pay.
-    let form_responses = props.validateBeforePayment();
-
-
-    //console.log('We are in the stripe process now. We are checking the form responses: ', form_responses);
-    if (!form_responses.success) {
-      // This means there was some validation problem in the data.
-      // Otherwise, we should have a form with "name" and "email" fields.
-      setCurrentlyPaying(false);
-      return;
-    }
-
-    // Here: make a booking over to the backend. Wait for it to end.
-    await makePaymentCall(form_responses);
+    // Here: make an order call to the backend.
+    await makePaymentCall();
 
     if (!orderId.current) {
       setError("An error happened when talking to our server. You didn't get charged. We're on this, but also feel free to reach out to us");
@@ -195,6 +168,9 @@ function CheckoutForm(props) {
                 // Everything is perfect. You are perfect.
                 setPaymentDone(true);
                 setCurrentlyPaying(false);
+
+                // Here, we should be redirecting them to the finishing page.
+                // TODO DO IT.
               } else {
                 setError("We encountered a problem talking to our own server. It has been reported, but feel free to reach out to us too.");
                 //Sentry.captureMessage("We ran into a error in finalizing a booking, after . The message was: " + result.error.message);
@@ -243,7 +219,17 @@ function CheckoutForm(props) {
 
       <div className="stripe-checkout-form py-3">
         <form onSubmit={handlePayment}>
-          <CardSection />
+        <div className="">
+
+<label>
+  Payment Info
+  </label>
+<div className="bounded-box p-2">
+  <CardElement options={CARD_ELEMENT_OPTIONS} />
+</div>
+</div>
+
+
           <div className="container-fluid px-0 my-3">
             <div className="row">
               <div className="col col-sm-12 col-md-6 col-lg-6">

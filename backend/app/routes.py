@@ -211,7 +211,7 @@ def get_dish_payment():
         order_dict['local_tax'] = the_dish.price *0.1025
 
         # Let's assume this? TODO: do more.
-        order_dict['delivery'] = 7.00
+        order_dict['delivery_fee'] = 7.00
 
         # I guess we can make our own fees too.
         order_dict['our_fees'] = the_dish.price * 0.15
@@ -225,7 +225,7 @@ def get_dish_payment():
 
 
         # This will be changed after they put in more stuff.
-        order_dict['total_cost'] = order_dict['subtotal'] + order_dict['local_tax'] + order_dict['delivery'] + order_dict['our_fees'] + order_dict['tip'] + order_dict['dasher_tip']
+        order_dict['total_cost'] = order_dict['subtotal'] + order_dict['local_tax'] + order_dict['delivery_fee'] + order_dict['our_fees'] + order_dict['tip'] + order_dict['dasher_tip']
 
         # Could be nobody too.
         if 'source_influencer' in request.form:

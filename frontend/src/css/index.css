@@ -25,10 +25,12 @@ pre {
 
 
 /*
-For the ProviderArea styles.
-
+For stripe cc.
 */
-
+.bounded-box {
+  border: 1px solid #ccc;
+  border-radius: 7px;
+}
 
 
 

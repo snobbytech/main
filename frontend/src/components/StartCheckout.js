@@ -211,7 +211,7 @@ function StartCheckout(props) {
     if (Object.keys(dishInfo).length && Object.keys(restaurantInfo).length) {
         // Then we can create some divs and stuff.
         dishSection = (
-            <div className="row mt-4 px-3">
+            <div className="row mt-4 ">
             <div className="col-md-4 col-4">
                 <img className={classes.dishphoto}
                     src={dishInfo.main_photo}
@@ -253,7 +253,7 @@ function StartCheckout(props) {
     // Street address
     // phone number
     let addressForm = (
-        <div className="px-2">
+        <div className="">
             <Form>
             <div className="row">
                 <div className="col-10">
@@ -362,7 +362,7 @@ function StartCheckout(props) {
     // notify me?
     // This is
     let deliveryInstructionsForm = (
-        <div className="px-2">
+        <div className="">
 
             <Form>
             <div className="row">
@@ -387,8 +387,11 @@ function StartCheckout(props) {
 
     // To make it easy, I should suggest a 18% tip amount.
 
-
-    let stripe_block = (
+    let payForm = '';
+    console.log("From outside: I have length ", Object.keys(preOrderInfo).length);
+    if (Object.keys(preOrderInfo).length) {
+        console.log("Hi, I am inside the computer");
+        let stripe_block = (
             <div>
               <StripePay
                 validateBeforePayment={() => {}}
@@ -398,12 +401,27 @@ function StartCheckout(props) {
             </div>
         );
 
-    let payForm = '';
-    payForm = (
-        <div>
-            Stripe stuff here.
-            <Form>
+    // Goes through the preOrderInfo and makes a thing.
+    let toPaySection = '';
+    toPaySection = (
+        <>
 
+        <div className="row">
+            <div className="col-md-10 col-10">Food total</div>
+            <div className="col-md-2 col-2">{preOrderInfo.subtotal}</div>
+        </div>
+        <div className="row">
+            <div className="col-md-10 col-10">Delivery Fee</div>
+            <div className="col-md-2 col-2">{preOrderInfo.delivery_fee}</div>
+        </div>
+        </>
+    )
+
+
+    payForm = (
+        <div className="">
+            {toPaySection}
+            <Form>
             <Form.Group controlId="phone">
               <Form.Label>Tip</Form.Label>
                 <Form.Control
@@ -411,14 +429,19 @@ function StartCheckout(props) {
                   controlId="tip"
                 />
             </Form.Group>
-            Other Stripe stuff.
 
             </Form>
-        {stripe_block}
+            <div className="row">
+            <div className="col-md-10 col-10">Total</div>
+            <div className="col-md-2 col-2">{preOrderInfo.taxes}</div>
+            </div>
+            {stripe_block}
 
         </div>
     )
+    }
 
+    console.log("Payform is like", payForm);
 
     // The stripe stuff should include the pay button as well.
 
@@ -426,7 +449,7 @@ function StartCheckout(props) {
     // This is... just going to be a big ole form.
 
     return (
-        <div>
+        <div className="container">
 
             {restaurantSection}
             {dishSection}
