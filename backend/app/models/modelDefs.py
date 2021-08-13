@@ -364,7 +364,7 @@ class Restaurant(ModelBase):
         return (True, "")
 
     def public_fields(self):
-        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
+        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'street_address', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
 
 # A single order.
 class Order(ModelBase):
@@ -387,14 +387,13 @@ class Order(ModelBase):
     # This is more resilient (eg. if dishes change, then we don't want those to be reflected here)
     dishes_stringified = Column(String)
 
-    subtotal      = Column(Float)
-    taxes         = Column(Float)
-    delivery_fee  = Column(Float)
-    tip           = Column(Float)
-    dasher_tip    = Column(Float)
-    total_cost    = Column(Float)
-
-    our_cut       = Column(Float)
+    subtotal       = Column(Float)
+    taxes          = Column(Float)
+    delivery_fee   = Column(Float)
+    tip            = Column(Float)
+    dasher_tip     = Column(Float)
+    total_cost     = Column(Float)
+    our_fees       = Column(Float)
     influencers_cut = Column(Float)
     restaurant_payout = Column(Float)
 

@@ -57,3 +57,51 @@ def get_bounding_latlons(lat, lon, dist_away_miles):
     # and fiji, I think we can punt this until we get big enough there.
 
     return {'lat_max': lat_max, 'lat_min': lat_min, 'lon_max': lon_max, 'lon_min': lon_min}
+
+
+
+
+
+##################################################################################3
+# Stripe-related stuff.
+
+import stripe
+"""
+
+Some basic stuff for Stripe on the backend. This should be replaced with the foodsnob
+stripe account.
+"""
+
+LIVEKEY = ''
+TESTKEY = 'sk_test_51HtkfVI5P0GyTyGvnYuTVQudtwJGXOmyPc4E7zamtEZGyirSqN7eYN76LSofjPHECce1prlzHp0IOqyJPF6Dsvsa00hXf2atuI'
+
+LIVEDOMAIN = ''
+TESTDOMAIN = 'http://localhost:3000'
+
+# This is accounts I used for booktime, and I'll have to update it when we switch over
+# to running live with foodsnob. Anyway, it's just a placeholder, otay?
+#
+live_acct_id = ''
+test_acct_id = 'acct_1HzOAXRA9kMKFb8T'
+
+stripe.api_key = test_acct_id
+
+# Note that we aren't modifying anything, we are just converting things over to
+# stripe land and returning an intent and stuff.
+def get_stripe_secret(amount_in_dollars):
+    # TODO: figure out if this is the form
+
+    amount_in_cents = int(amount_in_dollars * 100)
+    payment_intent = stripe.PaymentIntent.create(
+        payment_method_types=['card'],
+        amount=amount_in_cents,
+        currency='usd',
+        transfer_data={
+            'destination': test_acct_id
+            }
+        )
+    # This gives the client_secret that we'd need for this transaction.
+    return payment_intent.client_secret
+
+# TODO: figure out stripe ACH payouts.
+# For now: we could just do some things by hand. PUNTING FOR NOW.
