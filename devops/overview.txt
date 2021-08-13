@@ -1,0 +1,10 @@
+Thoughts and prayers as I'm getting situated with AWS. I'm new to this.
+
+So far, the thinking is that I want to set up a create-react-app frontend, an EC2 instance for the backend, and a postgres instance living somewhere.
+
+I know how to do this in GCP, but not sure if everything is equivalent in EC2.
+
+- Right now, it looks like Amplify is recommended by people.
+- So far, on the backend I'm probably going to go the easy way out and rent an EC2 instance.
+
+Let's start on the backend first?

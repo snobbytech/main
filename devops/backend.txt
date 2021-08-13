@@ -1,0 +1,61 @@
+Backend:
+
+I'm getting the dumbest possible thing, so I'm going to try and get an EC2 instance.
+
+Setting it up with ubuntu 20.04 because the package manger is easier?
+
+I'm not *really* sure what I'll need yet, but: Looks like t3g.small will cost us like 15/mo, which won't be too bad. So to start off, let me go with one of those?
+It's got 2 cores, 2 gigs of memory, and up to 5 gigabit in network capacity. So, probably ok, not the best, not the worst. Let's go with that for now? We have 10k in credits anyway, and if I record how I do this I can probably get things faster.
+
+- We could probably eventually go to AWS Lambda instead to handle autoscaling.
+
+Anyway, I'm not even sure how our server's going to be pounded at the start, so let's just get something small and generic and I can set it up more correctly, later.
+
+
+OK, so here's the full specs list:
+
+ubuntu 20.04
+t3.small instance
+2 vcpus
+2gb memory
+
+Launching...
+
+- Actually, I have to install/download a keypair before launching? I downloaded it.
+
+Now, how do I run it?
+https://us-east-2.console.aws.amazon.com/ec2/v2/home?region=us-east-2#LaunchInstanceWizard:
+
+Connecting w/ SSH:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html
+
+==================================================================
+All right! So now I finally get to it.  These guides are NOT written that well.
+
+1) Download the private key - I did that upon creation, and you can yourself create a keypair here:
+https://us-east-2.console.aws.amazon.com/ec2/v2/home?region=us-east-2#KeyPairs:keyName=snob-1-keypair
+
+I have to chmod it:
+chmod 600 snob-1-keypair.pem
+
+The default username for ubuntu machines is just "ubuntu"
+
+So, then, to ssh into our machine using our ipv4 address:
+ssh -i snob-1-keypair.pem ubuntu@18.118.143.37
+
+OK, I changed the password (though I guess they don't have one set):
+
+sudo passwd:
+changed it to "snob"
+
+Anyway, I made it a bash alias so it's easy to get on.
+
+Next step: I'll be installing basic packages on this machine.
+
+Installations:
+- tmux exists
+- vim exists
+
+Python isn't. Looks like people on reddit still recommend conda, so I'm going to install it from that.
+
+- Made the appropriate vim, emacs, colors files.  Added my .vimrc and .emacs files.

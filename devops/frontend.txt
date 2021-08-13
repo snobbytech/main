@@ -1,0 +1,16 @@
+Here's my running log as I'm reading up on frontend.
+
+Actually, it seems like AWS Amplify is pretty sucks and limiting? That's annoying.
+
+Well, let me try the Amplify thing anyway. I'm setting something up real quick...
+
+I went to this place:
+https://us-west-2.console.aws.amazon.com/amplify/home?region=us-west-2#/create/manual
+
+And chose the drag-and-drop deployment method after running npm run build.
+
+# Cool, I guess this is now deployed, we have a semblance of a frontend now!
+
+https://prod.d2om9hl2a5v7la.amplifyapp.com/
+
+# Thatwaseasy. I think maybe for this thing S3 deployment might be cheaper in the long run, but we can think about that later.
