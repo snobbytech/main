@@ -59,3 +59,22 @@ Installations:
 Python isn't. Looks like people on reddit still recommend conda, so I'm going to install it from that.
 
 - Made the appropriate vim, emacs, colors files.  Added my .vimrc and .emacs files.
+- Installed miniconda:
+  - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+- Grabbing our repo:
+  - Made ssh key on the machine, and added the key to my github.
+
+- Installed requirements.txt.
+- I had to install gunicorn again?
+- Go in /backend, create dirs for /instance and /config
+- copy over the files in /config
+
+Needed to install this because of psychop2
+sudo apt-get install --reinstall libpq-dev
+
+- Needed gcc:
+sudo apt-get install gcc
+Now I can install psycogp2
+
+Cool. Now I can... do everything except the real database.
