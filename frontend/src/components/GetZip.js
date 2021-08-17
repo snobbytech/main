@@ -121,16 +121,18 @@ function GetZip(props) {
         if (!refer_name) {
             // OK, let's just assume an influencer. Someone like fionaeats.
             refer_name = 'fionaeats365';
+            console.log("Didnt have a real referrer, so we set fiona by default");
         }
 
         console.log("About to redirect to", refer_name);
 
-        /*
+        // Also store here: the original referrer was this person.
+        localStorage.setItem("snob_refer", refer_name);
+
         // TODO: save the history.
         history.push({
             pathname: "/u/" + refer_name,
         });
-        */
 
     }
 
