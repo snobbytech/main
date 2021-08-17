@@ -1,1 +1,37 @@
-Writing
+
+I'll be using Amazon RDS as a service here. Most of my database
+
+- Looks like the cheap (dev) version of the db: $.24/hour.
+
+database name:
+foodsnob
+master username: snob
+pw: snobbysnob
+
+The database url is:
+foodsnob.cgw75bez6kmv.us-east-2.rds.amazonaws.com
+
+(The endpoint name is
+foodsnob.cgw75bez6kmv.us-east-2.rds.amazonaws.com
+)
+
+
+Those assholes. It's not documented. Fuck fuck fuck you.
+
+OK. The tl;dr is that they don't document any of this shit and aws is god awful.
+OK. So the things I had to end up doing were:
+
+- Create the RDS instance. Do NOT use the easy install option.
+  - Select that the db must be publicly available.
+  - Go into the security rules option. Create a new security group.
+    - Go into "edit inbound rules"
+    - Type: PostgresSQL (before I had it on TCP)
+      - Source type: all (0.0.0.0/0)
+
+ALSO: when they create the db, the db created is called postgres, and not the dbname that you gave them.
+Why is that? Who knows. Because amazon is all idiots and I hate them all.
+
+Anyway, the final command is like:
+psql --host=foodsnob.cgw75bez6kmv.us-east-2.rds.amazonaws.com --port=5432 --username=snob --password --dbname=postgres
+
+- OK, and I verified: make_test_data works.
