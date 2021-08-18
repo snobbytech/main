@@ -134,10 +134,13 @@ function OneDish(props) {
         //console.log("Well, this was clicked, so you can actually... redirect now.")
 
         // I should also
+        /*
         history.push({
-            pathname: "/startcheckout",
-
+            pathname: "/startcheckout?dish_id=" + props.dish.id,
         })
+        */
+       // This is honestly ridiculous. I hate react. I hate javascript people.
+       window.location.href = "/startcheckout?dish_id=" + props.dish.id;
 
     }
 
@@ -173,14 +176,12 @@ function OneDish(props) {
 function DishArray(props) {
 
     const classes = useStyles();
-    const history = useHistory();
 
     // Not super importante.
     useEffect(() => {
     }, []);
 
     console.log("Doin it inside DishArray, the dishes are ", props.dishes);
-
     let childDishes = '';
     if (props.dishes) {
         // We will
@@ -213,7 +214,6 @@ function DishArray(props) {
 function UserPage(props) {
 
     const classes = useStyles();
-    const history = useHistory();
 
     const [err, setErr] = useState("");
     // Their zip code.

@@ -208,13 +208,15 @@ def get_dish_payment():
         order_dict['subtotal'] = the_dish.price
         # TODO SOON: get an actual tax calculator for the actual thing.
         # Goign to take the worst case scenario for californian restaurants.
-        order_dict['local_tax'] = the_dish.price *0.1025
+
+        # Round this.
+        order_dict['local_tax'] = round(the_dish.price *0.1025, 2)
 
         # Let's assume this? TODO: do more.
         order_dict['delivery_fee'] = 7.00
 
         # I guess we can make our own fees too.
-        order_dict['our_fees'] = the_dish.price * 0.15
+        order_dict['our_fees'] = round(the_dish.price * 0.15, 2)
 
         # This is set in the frontend and we'll have to update it.
         # TODO: let the user tip the restaurant
