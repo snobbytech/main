@@ -78,3 +78,26 @@ sudo apt-get install gcc
 Now I can install psycogp2
 
 Cool. Now I can... do everything except the real database.
+
+- By the way: be careful about the security groups inside the ec2 console. It's really easy to just make your machine
+  not accessible to the outside. So if we ever enter a state where we can't ssh in, this is probably why.
+
+==================================================================
+
+Now: I'm going to update and set up nginx.
+- sudo apt install nginx-core
+Now: I'm going to create the certificate...
+
+sudo snap install core; sudo snap refresh core
+sudo snap install certbot --classic
+
+sudo certbot --nginx
+
+I mapped yclip.xyz to this machine. Basically yclip.xyz is a leftover domain I already had.
+
+Certificate is saved at: /etc/letsencrypt/live/yclip.xyz/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/yclip.xyz/privkey.pem
+
+Saving a copy of the nginx.conf locally.  To restart nginx, do:
+
+sudo systemctl restart nginx
