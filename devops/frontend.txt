@@ -14,3 +14,14 @@ And chose the drag-and-drop deployment method after running npm run build.
 https://prod.d2om9hl2a5v7la.amplifyapp.com/
 
 # Thatwaseasy. I think maybe for this thing S3 deployment might be cheaper in the long run, but we can think about that later.
+
+
+In case of this xml no styling error: use these commands to overwrite the redirect for the single page app redirect issue. IT's stupid.
+
+
+https://github.com/aws-amplify/amplify-cli/issues/5047
+
+Original address: </^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|json|map)$)([^.]+$)/>
+Destination Address: /index.html
+Redirect Type: 200(Rewrite)
+Country Code: can be left blank

@@ -44,7 +44,7 @@
   },
   "scripts": {
     "start": "REACT_APP_BACKEND_URL='http://localhost:5000' react-scripts start",
-    "build": "REACT_APP_BACKEND_URL='https://getworking.xyz' react-scripts build",
+    "build": "REACT_APP_BACKEND_URL='https://yclip.xyz' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

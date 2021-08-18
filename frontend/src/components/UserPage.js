@@ -230,8 +230,17 @@ function UserPage(props) {
 
         // Grab the username.
         // TODO: change this name.
-        let influencer_username = window.location.pathname.substring(
-            window.location.pathname.lastIndexOf("/") + 1
+
+
+        // Things can change if we end with a slash.
+        let pathname = window.location.pathname;
+        if (pathname.lastIndexOf("/")+1 == pathname.length) {
+            pathname = pathname.substring(0, pathname.lastIndexOf("/"));
+        }
+
+
+        let influencer_username = pathname.substring(
+            pathname.lastIndexOf("/") + 1
         );
 
         if (!influencer_username) {
@@ -241,7 +250,6 @@ function UserPage(props) {
 
         // Otherwise, place a request to the backend to get the user's info, and
         // also all their datas.
-
 
         // Sure, why not.
         let zip_code = "10011";
