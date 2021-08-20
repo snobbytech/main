@@ -83,6 +83,116 @@ perdish_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant}/menu_items/{
 
 
 api_pt = 'https://api-gtm.grubhub.com/restaurants/{}'
+
+def parse_dish(dish_txt):
+    perdish_options = []
+
+    # I don't really want to save this until later, but it is
+    # stuff we'll have to deal with at some point.
+
+    # Otherwise, we can... do it... and we can read the results.
+    perdish_json = json.loads(dish_txt)
+
+    # Now we get the specific things for the dish, yay.
+    perdish_categories = perdish_json['choice_category_list']
+    # This can be a list.
+    for one_category in perdish_categories:
+        one_option = {}
+        one_option['name'] = one_category['name']
+        one_option['max_options'] = one_category['max_choice_options']
+        one_option['min_options'] = one_category['min_choice_options']
+        # There's also a list, poopity scoop.
+        option_values = []
+        for tmp_option in one_category['choice_option_list']:
+            option_values.append({'name': tmp_option['description'], 'price': tmp_option['price']['amount']})
+            #one_option['options'] = option_values
+            # And, add this to the perdish options...
+
+            # At some point, this has got to be stored in some thing somewhere.
+        one_option['options'] = option_values
+        perdish_options.append(one_option)
+    return perdish_options
+
+def parse_rest(rest_txt):
+    rest_dict = json.loads(rest_txt)
+
+    rest = rest_dict['restaurant']
+    avail = rest_dict['restaurant_availability']
+
+    avail_kept = {}
+    rest_kept  = {}
+    menu_kept  = []
+
+    # Things to maybe keep in the future:
+    # cash_accepted
+    # Cool, now let's figure out what's in here.
+    avail_kept['available_for_delivery'] = avail['available_for_delivery']
+    avail_kept['available_for_pickup'] = avail['available_for_pickup']
+    avail_kept['hours'] = avail['available_hours']
+    avail_kept['hours_pickup'] = avail['available_hours_pickup']
+    avail_kept['delivery_fee_taxable'] = avail['delivery_fee_taxable']
+    avail_kept['order_minimum'] = avail['order_minimum']
+    avail_kept['pickup_cutoff'] = avail['pickup_cutoff']
+    avail_kept['pickup_estimate_range'] = avail['pickup_estimate_range_v2']
+    avail_kept['restaurant_id_gh'] = avail['restaurant_id']
+    avail_kept['sales_tax'] = avail['sales_tax']
+    # They also have a service toll fee? Check this later.
+
+    # Now: go through rest_kept.
+    rest_kept['address'] = rest['address']
+    # This makes it easy.
+    rest_kept['latitude'] = rest['latitude']
+    rest_kept['longitude'] = rest['longitude']
+    rest_kept['name'] = rest['name']
+    rest_kept['phone_ordering_available'] = rest['phone_ordering_available']
+    rest_kept['phone'] = rest['phone_number_for_delivery']
+
+    menu = rest['menu_category_list']
+    # We also should store the menu items here.
+
+    # Each item is a category.
+    for one_item in menu:
+        cat_dict = {}
+        cat_dict['available'] = one_item['available']
+        cat_dict['name'] = one_item['name']
+        # Now get the list of dishes.
+        dish_list = one_item['menu_item_list']
+        dishes = []
+        for one_dish in dish_list:
+            dish_kept = {}
+            dish_kept['avalable'] = one_dish['available']
+            dish_kept['name'] = one_dish['name']
+            # There's also a currency, but for now we're only
+            # dealing with USD anyway.
+            dish_kept['price'] = one_dish['price']['amount']
+            dish_kept['id'] = one_dish['id']
+
+            # This also lets us pull in extra options about the dish...
+            # But it's inefficient. It means we have to make a lot of network calls every time we want to scrape a restaurant.
+            # Oh well. In the long term, we can probably do a best-guess re: whether a dish "should" have extra options.
+
+            if False:
+                perdish_url = perdish_tgt.format(id_num, dish_kept['id'])
+                # I think the extra things here are about the same.
+                perdish_response = requests.get(perdish_url, headers=header, params=gh_params)
+
+                if perdish_response.status_code != 200:
+                    # Something broke, alert and be quiet.
+                    print("Something broke when grabbing {}, exiting".format(perdish_url))
+                    sys.exit()
+                # Otherwise, parse the perdish stuff.
+                dish_options = parse_dish(perdish_response.text)
+                dish_kept['options'] = dish_options
+            dishes.append(dish_kept)
+        cat_dict['dishes'] = dishes
+        menu_kept.append(cat_dict)
+
+            # Bunch of options...
+    return {'avail': avail_kept,
+            'rest': rest_kept,
+            'menu': menu_kept}
+
+
 def scrape_restaurant(github_url):
     # First order: take the url and grab the actual id:
     id_num = ''
@@ -106,110 +216,23 @@ def scrape_restaurant(github_url):
         print("Something broke when grabbing {}, exiting".format(github_url))
         sys.exit()
 
-    # Otherwise, we can... do it... and we can read the results.
-    json_response = json.loads(gh_response.text)
-
-    try:
-        rest = json_response['restaurant']
-        avail = json_response['restaurant_availability']
-
-        avail_kept = {}
-        rest_kept  = {}
-        menu_kept  = []
-
-        # Things to maybe keep in the future:
-        # cash_accepted
-        # Cool, now let's figure out what's in here.
-        avail_kept['available_for_delivery'] = avail['available_for_delivery']
-        avail_kept['available_for_pickup'] = avail['available_for_pickup']
-        avail_kept['hours'] = avail['available_hours']
-        avail_kept['hours_pickup'] = avail['available_hours_pickup']
-        avail_kept['delivery_fee_taxable'] = avail['delivery_fee_taxable']
-        avail_kept['order_minimum'] = avail['order_minimum']
-        avail_kept['pickup_cutoff'] = avail['pickup_cutoff']
-        avail_kept['pickup_estimate_range'] = avail['pickup_estimate_range_v2']
-        avail_kept['restaurant_id_gh'] = avail['restaurant_id']
-        avail_kept['sales_tax'] = avail['sales_tax']
-        # They also have a service toll fee? Check this later.
-
-        # Now: go through rest_kept.
-        rest_kept['address'] = rest['address']
-        # This makes it easy.
-        rest_kept['latitude'] = rest['latitude']
-        rest_kept['longitude'] = rest['longitude']
-        rest_kept['name'] = rest['name']
-        rest_kept['phone_ordering_available'] = rest['phone_ordering_available']
-        rest_kept['phone'] = rest['phone_number_for_delivery']
-
-        menu = rest['menu_category_list']
-        # We also should store the menu items here.
-
-        # Each item is a category.
-        for one_item in menu:
-            cat_dict = {}
-            cat_dict['available'] = one_item['available']
-            cat_dict['name'] = one_item['name']
-            # Now get the list of dishes.
-            dish_list = one_item['menu_item_list']
-            dishes = []
-            for one_dish in dish_list:
-                dish_kept = {}
-                dish_kept['avalable'] = one_dish['available']
-                dish_kept['name'] = one_dish['name']
-                # There's also a currency, but for now we're only
-                # dealing with USD anyway.
-                dish_kept['price'] = one_dish['price']['amount']
-                dish_kept['id'] = one_dish['id']
-
-                # This also lets us pull in extra options about the dish...
-                # But it's inefficient. It means we have to make a lot of network calls every time we want to scrape a restaurant.
-                # Oh well. In the long term, we can probably do a best-guess re: whether a dish "should" have extra options.
-
-                perdish_url = perdish_tgt.format(id_num, dish_kept['id'])
-                # I think the extra things here are about the same.
-                perdish_response = requests.get(perdish_url, headers=header, params=gh_params)
-
-                if perdish_response.status_code != 200:
-                    # Something broke, alert and be quiet.
-                    print("Something broke when grabbing {}, exiting".format(perdish_url))
-                    sys.exit()
-
-                # Bunch of options...
-                perdish_options = []
-
-                # I don't really want to save this until later, but it is
-                # stuff we'll have to deal with at some point.
-
-                # Otherwise, we can... do it... and we can read the results.
-                perdish_json = json.loads(perdish_response.text)
-
-                # Now we get the specific things for the dish, yay.
-                perdish_categories = perdish_json['choice_category_list']
-                # This can be a list.
-                for one_category in perdish_categories:
-                    one_option = {}
-                    one_option['name'] = one_category['name']
-                    one_option['max_options'] = one_category['max_choice_options']
-                    one_option['min_options'] = one_category['min_choice_options']
-                    # There's also a list, poopity scoop.
-                    option_values = []
-                    for one_option in one_category['choice_option_list']:
-                        option_values.append({'name': one_option['description'], 'price': one_option['price']['amount']})
-                    one_option['options'] = option_values
-                    # And, add this to the perdish options...
-
-                    # At some point, this has got to be stored in some thing somewhere.
-                    perdish_options.append(one_option)
+    x = parse_menu(gh_response.text)
+    print("Parsed!")
 
 
+# That's cool, ok. Now let's... read the restaurant file?
 
-        # OK, hm. It looks like there are follow-up calls that tell you what the options are:
+restaurant_stuff = ''
+with open('thai_restaurant.txt', 'r') as f:
+    rest_txt = f.read()
 
+    rest_dict = parse_rest(rest_txt)
+    #print(rest_dict)
 
+# Parsing the restaurant stuff works, yay.
 
-
-    menu_data = {}
-
-
-
-    pass
+menu_stuff = ''
+with open("thai_dish.txt", 'r') as f:
+    dish_txt = f.read()
+    dish_dict = parse_dish(dish_txt)
+    print(dish_dict)
