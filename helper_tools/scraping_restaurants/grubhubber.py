@@ -5,17 +5,64 @@ Given a grubhub url (what the restaurant is), we'll go in and
 grab the restaurant's properties and menu. All that good stuff.
 And output it all in our own nice little JSON file.
 
+I made two text files: thai_restaurant.txt and thai_dish.txt that have the raw data
+for thai villa in NYC, to make sure our ish works.
+
 """
 
 import sys
 import requests
 import json
 
-headers = {
+cur_access_token = ''
+
+# In the future, we can probably save these access- and refresh- tokens.
+# Looks like some of these units are returned in minutes. It looks like the refresh
+# tokens will last like, a week. Not that it's necessarily useful like this.
+
+def get_access_token():
+    global cur_access_token
+
+
+    ac_headers = {
+        'authority': 'api-gtm.grubhub.com',
+        'authorization': 'Bearer aaa',
+        'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
+        'content-type': 'application/json;charset=UTF-8',
+        'accept': '*/*',
+        'origin': 'https://www.grubhub.com',
+        'sec-fetch-site': 'same-site',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-dest': 'empty',
+        'referer': 'https://www.grubhub.com/',
+        'accept-language': 'en-US,en;q=0.9',
+    }
+
+    ac_data = '{"brand":"GRUBHUB","client_id":"beta_UmWlpstzQSFmocLy3h1UieYcVST","device_id":-563554861,"refresh_token":"0e8002a8-5b90-4002-9993-c0d2624c4463"}'
+
+    ac_response = requests.post('https://api-gtm.grubhub.com/auth', headers=ac_headers, data=ac_data)
+    if ac_response.status_code != 200:
+        print("We failed trying to get an access token - check the request? ")
+        sys.exit()
+    # Otherwise, read the json.
+
+    ac_json = json.loads(ac_response.text)
+
+    ac_key = ac_json['session_handle']['access_token']
+    # Can print out the other stuff too...
+    cur_access_token = ac_key
+
+
+    pass
+
+
+
+
+rest_headers = {
     'authority': 'api-gtm.grubhub.com',
     'cache-control': 'max-age=0',
     'accept': 'application/json',
-    'authorization': 'Bearer 6babddd0-157e-4596-89de-49fbfda21e08',
+    'authorization': 'Bearer {}',
     'if-modified-since': '0',
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
     'origin': 'https://www.grubhub.com',
@@ -26,7 +73,7 @@ headers = {
     'accept-language': 'en-US,en;q=0.9',
 }
 
-grubhub_params = (
+rest_params = (
     ('hideChoiceCategories', 'true'),
     ('version', '4'),
     ('variationId', 'rtpFreeItems'),
@@ -34,6 +81,10 @@ grubhub_params = (
     ('hideUnavailableMenuItems', 'true'),
     ('hideMenuItems', 'false'),
 )
+rest_tgt = 'https://api-gtm.grubhub.com/restaurants/{}'
+
+
+
 
 # Note, in this case, the auntie guan's kitchen url is
 # https://www.grubhub.com/restaurant/auntie-guans-kitchen-108-108-w-14th-st-new-york/322383
@@ -54,7 +105,7 @@ perdish_headers = {
     'authority': 'api-gtm.grubhub.com',
     'cache-control': 'no-cache',
     'accept': 'application/json',
-    'authorization': 'Bearer c3ce4abe-e398-4e83-a985-5dba3f3f7d11',
+    'authorization': '',
     'perimeter-x': 'eyJ1IjoiZDAzMWM5OTAtMDFjZC0xMWVjLTg3YTktMzE2ZTYzN2JiMGYxIiwidiI6ImQwMzQyMmVhLTAxY2QtMTFlYy05ODZkLTUzNWE0MzRjNTc1OSIsInQiOjE2Mjk0ODIxMTQyOTYsImgiOiI3MTg3OGNhZGU3YjNhYWI5YWUzNjVjMGFlMmNkYTFlYjU1NGJhODVkMmE0MTg5MTU2NGU0ZjdiMzZiMWIyZTcwIn0=',
     'if-modified-since': '0',
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
@@ -82,7 +133,6 @@ perdish_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant}/menu_items/{
 # response = requests.get('https://api-gtm.grubhub.com/restaurants/322383/menu_items/17844438?time=1629481712797&hideUnavailableMenuItems=true&orderType=standard&version=4', headers=headers)
 
 
-api_pt = 'https://api-gtm.grubhub.com/restaurants/{}'
 
 def parse_dish(dish_txt):
     perdish_options = []
@@ -151,6 +201,9 @@ def parse_rest(rest_txt):
     # We also should store the menu items here.
 
     # Each item is a category.
+    perdish_access_headers = perdish_headers.copy()
+    perdish_access_headers['authorization'] = perdish_access_headers['authorization'].format(cur_access_token)
+
     for one_item in menu:
         cat_dict = {}
         cat_dict['available'] = one_item['available']
@@ -174,7 +227,7 @@ def parse_rest(rest_txt):
             if False:
                 perdish_url = perdish_tgt.format(id_num, dish_kept['id'])
                 # I think the extra things here are about the same.
-                perdish_response = requests.get(perdish_url, headers=header, params=gh_params)
+                perdish_response = requests.get(perdish_url, headers=header, params=perdish_params)
 
                 if perdish_response.status_code != 200:
                     # Something broke, alert and be quiet.
@@ -205,34 +258,27 @@ def scrape_restaurant(github_url):
     # Also, remove url params.
     id_num = id_num.split('?')[0]
 
-    calling_url = api_pt.format(id_num)
+    calling_url = rest_tgt.format(id_num)
 
+    rest_access_headers = rest_headers.copy()
+    rest_access_headers['authorization'] = rest_access_headers['authorization'].format(cur_access_token)
 
     # OK, now we can make the requests call.
-    gh_response = requests.get(calling_url, headers=headers, params=gh_params)
+    gh_response = requests.get(calling_url, headers=rest_access_headers, params=rest_params)
+
 
     if gh_response.status_code != 200:
         # Something broke, alert and be quiet.
         print("Something broke when grabbing {}, exiting".format(github_url))
+        print(gh_response)
+        print(gh_response.status_code)
         sys.exit()
 
-    x = parse_menu(gh_response.text)
-    print("Parsed!")
+    x = parse_rest(gh_response.text)
+    return(x)
 
 
-# That's cool, ok. Now let's... read the restaurant file?
-
-restaurant_stuff = ''
-with open('thai_restaurant.txt', 'r') as f:
-    rest_txt = f.read()
-
-    rest_dict = parse_rest(rest_txt)
-    #print(rest_dict)
-
-# Parsing the restaurant stuff works, yay.
-
-menu_stuff = ''
-with open("thai_dish.txt", 'r') as f:
-    dish_txt = f.read()
-    dish_dict = parse_dish(dish_txt)
-    print(dish_dict)
+get_access_token()
+grubhub_url = 'https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205'
+grub_dicts = scrape_restaurant(grubhub_url)
+print(grub_dicts)
