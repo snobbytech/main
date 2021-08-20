@@ -8,11 +8,17 @@ And output it all in our own nice little JSON file.
 I made two text files: thai_restaurant.txt and thai_dish.txt that have the raw data
 for thai villa in NYC, to make sure our ish works.
 
+Sample usage:
+dchen@dchen-ThinkPad-X1-Carbon-6th:~/snobby_main/helper_tools/scraping_restaurants$ ./grubhubber.py --url https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205
+
+
 """
 
 import sys
 import requests
 import json
+import argparse
+
 
 cur_access_token = ''
 
@@ -278,7 +284,22 @@ def scrape_restaurant(github_url):
     return(x)
 
 
-get_access_token()
-grubhub_url = 'https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205'
-grub_dicts = scrape_restaurant(grubhub_url)
-print(grub_dicts)
+#get_access_token()
+
+# All right, I guess this means I can start
+#grubhub_url = 'https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205'
+#grub_dicts = scrape_restaurant(grubhub_url)
+#print(grub_dicts)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', required=True)
+    args = parser.parse_args()
+
+    get_access_token()
+    grub_dicts = scrape_restaurant(args.url)
+    print(grub_dicts)
+
+if __name__ == '__main__':
+    main()
