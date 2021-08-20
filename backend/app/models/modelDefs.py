@@ -277,6 +277,8 @@ class Restaurant(ModelBase):
     # eg. Toast
     pos_options = Column(String)
 
+    available_pickup = Column(Boolean)
+
     # Full address string.
     street_address = Column(String)
 
@@ -303,6 +305,27 @@ class Restaurant(ModelBase):
     num_hearts = Column(Integer, default=0)
     # Needs to be changed eventually.
     category  = Column(String)
+
+    # This is a stringified version of an hours_open thing.
+    # Note that this is given in like, UTC Time or something.
+    # TODO: figure this ish out.
+    hours     = Column(String)
+    hours_pickup = Column(String)
+    # I'm guessing it's like,
+    pickup_cutoff = Column(Number)
+
+    # Time range that these pickups tend to be.
+    pickup_estimate_min = Column(Number)
+    pickup_estimate_max = Column(Number)
+
+
+    # This is in the number multipled. So, 1% is 0.01
+    sales_tax_rate = Column(Float)
+    delivery_fee_taxable = Column(Boolean)
+
+    # This is in dollars.
+    order_minimum = Column(Float)
+
 
     # Will need scoring parameters too.
 
