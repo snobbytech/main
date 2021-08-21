@@ -193,11 +193,34 @@ class UserFaveRestaurants(ModelBase):
 
 # Different dishes at different restaurants.
 
+
+# Note: in general, a dish can be a member of multiple categories.
+class DishCategory(ModelBase):
+    __tablename__ = 'dishcategories'
+    id = Column(Integer, primary_key=True)
+
+
+    name = Column(String)
+    # How to sort categories when displaying a menu
+    rank = Column(Integer)
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+
+# Note: when implementing population, I should make sure there arent
+#       double entries here...
+#       Also: I think there are better ways of doing this with
+#       sqlalchemy, but too lazy to look it up right now.
+class DishCategoryMap(ModelBase):
+    __tablename__ = 'dishcategorymap'
+
+    id = Column(Integer, primary_key=True)
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
+    category_id = Column(Integer, ForeignKey('dishcategories.id'))
+
+
 # TODO (important): allow for dish modifications. Stuff like,
 # add an egg, what sauce, etc. Basically need a way for this to be easily
 # done for the restaurant
 class Dish(ModelBase):
-
     __tablename__ = 'dishes'
     # I don't think this needs any dumb hash anyway.
     id = Column(Integer, primary_key=True)
@@ -219,6 +242,10 @@ class Dish(ModelBase):
     # Path to the main photo.
     # This cannot be empty.
     main_photo = Column(String)
+
+    # Just in case, going to keep this in here.
+    grubhub_id = Column(String)
+    # There will probably be lines here for ubereats and dd.
 
     # Dishes will need some amount of scoring associated with them..
 
@@ -252,6 +279,19 @@ class Dish(ModelBase):
 
     def public_fields(self):
         return ['id', 'name', 'restaurant_id', 'price', 'description', 'category', 'num_views', 'num_hearts', 'main_photo']
+
+class DishAddons(ModelBase):
+    __tablename__ = 'dishaddons'
+
+    name = Column(String)
+    # For the ordering.
+    rank = Column(Integer)
+    min_options = Column(Integer, default=0)
+    max_options = Column(Integer)
+
+    # Going to just stringify and unstringify these.
+    # Going to be a list of dicts, "name", "price".
+    options = Column(String)
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
@@ -326,6 +366,11 @@ class Restaurant(ModelBase):
     # This is in dollars.
     order_minimum = Column(Float)
 
+    # For data syncing.
+    grubhub_url  = Column(String)
+    ubereats_url = Column(String)
+    dd_url       = Column(String)
+    yelp_url     = Column(String)
 
     # Will need scoring parameters too.
 
