@@ -289,6 +289,7 @@ class Dish(ModelBase):
 # object.
 class DishAddons(ModelBase):
     __tablename__ = 'dishaddons'
+    id = Column(Integer, primary_key=True)
 
     # Stuff like, "Protein", "Sauce"
     name = Column(String)
@@ -378,11 +379,11 @@ class Restaurant(ModelBase):
     hours     = Column(String)
     hours_pickup = Column(String)
     # I'm guessing it's like,
-    pickup_cutoff = Column(Number)
+    pickup_cutoff = Column(Integer)
 
     # Time range that these pickups tend to be.
-    pickup_estimate_min = Column(Number)
-    pickup_estimate_max = Column(Number)
+    pickup_estimate_min = Column(Integer)
+    pickup_estimate_max = Column(Integer)
 
 
     # This is in the number multipled. So, 1% is 0.01
