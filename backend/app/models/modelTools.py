@@ -134,6 +134,36 @@ def get_arbitrary_dish():
         return ss.query(Dish).first()
     return None
 
+# Dish Addons (eg. "Beef" option, etc.
+def add_dishaddon(addonDict):
+    newAddon = DishAddons()
+    newAddon.populate_from_dict(addonDict)
+    with session_scope() as ss:
+        ss.add(newAddon)
+        ss.flush()
+    return newAddon
+
+def mod_dishaddon(addonDict):
+    existing_addon = get_dishaddon(addonDict['id'])
+    existing_addon.populate_from_dict(addonDict)
+    with session_scope() as ss:
+        # Grab existing, modify it.
+        ss.add(existing_addon)
+        ss.flush()
+    return existing_addon
+
+def get_dishaddon(addon_id):
+    with session_scope() as ss:
+        return ss.query(DishAddons).get(addon_id)
+
+def remove_dishaddon(addon_id):
+    # TODO: do this.
+    pass
+
+def get_addons_for_dish(dish_id):
+    pass
+
+
 # Mapping DishCategories.
 def add_dish_category(catDict):
     newCategory = DishCategory()

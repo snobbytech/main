@@ -284,9 +284,13 @@ class Dish(ModelBase):
     def public_fields(self):
         return ['id', 'name', 'restaurant_id', 'price', 'description', 'category', 'num_views', 'num_hearts', 'main_photo']
 
+# Note: this is an entire list of addons. For example, pad thai can have
+# Chicken, Beef, Mock Duck options. For one such category, we contain it in one DishAddons
+# object.
 class DishAddons(ModelBase):
     __tablename__ = 'dishaddons'
 
+    # Stuff like, "Protein", "Sauce"
     name = Column(String)
     # For the ordering.
     rank = Column(Integer)
@@ -296,6 +300,18 @@ class DishAddons(ModelBase):
     # Going to just stringify and unstringify these.
     # Going to be a list of dicts, "name", "price".
     options = Column(String)
+
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'rank' in props:
+            self.rank = props['rank']
+        if 'min_options' in props:
+            self.min_rank = props['min_rank']
+        if 'max_options' in props:
+            self.max_options = props['max_options']
+        if 'options' in props:
+            self.options = props['options']
 
     def public_fields(self):
         return ['id', 'name', 'rank', 'min_options', 'max_options', 'options']
