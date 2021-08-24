@@ -399,7 +399,6 @@ def get_local_dishes(lat, lon, milesRadius=5):
 # Initiate order
 
 def make_order(orderDict):
-
     newOrder = Order()
     newOrder.populate_from_dict(orderDict)
     valid, msg = newOrder.validate()
@@ -412,7 +411,6 @@ def make_order(orderDict):
 
 # What does this mean?
 def update_order(orderId, orderDict):
-
     the_order = get_order(orderId)
     if the_order:
         the_order.populate_from_dict(orderDict)
@@ -424,14 +422,68 @@ def update_order(orderId, orderDict):
             return the_order
     return None
 
+# Make sure everything adds up between Order and OrderLines.
+def recalc_order_orderlines(order_id):
+    # TODO: implement this?
+
+    running_subtotal = 0
+    all_orderlines = get_orderlines_for_order(order_id)
+    the_order = get_order(order_id)
+    for one_orderline in all_orderlines:
+        running_subtotal += one_orderline.end_price
+    # Update the order now.
+    the_order.subtotal = running_subtotal
+    with session_scope() as ss:
+        ss.add(the_order)
+
+
 def get_order(orderId):
     with session_scope() as ss:
         return ss.query(Order).get(orderId)
     return None
 
+# Operations on OrderLines.
+def add_orderline(orderlineDict):
+    orderline = OrderLineItem()
+    orderline.populate_from_dict(orderlineDict)
+    with session_scope() as ss:
+        ss.add(orderline)
+        ss.flush()
+    return orderline
+
+def mod_orderline(orderlineDict):
+    orderline = get_orderline(orderlineDict['id'])
+    orderline.populate_from_dict(orderlineDict)
+    with session_scope() as ss:
+        ss.add(orderline)
+        ss.flush()
+    # Force a recalc.
+    recalc_order_orderlines(orderlineDict['order_id'])
+
+
+def get_orderline(orderline_id):
+    with session_scope() as ss:
+        orderline = ss.query(OrderLineItem).get(orderline_id)
+    return orderline
+
+
+def remove_orderline(orderline_id):
+    # TODO: implement this.
+    # Also force a recalc of the order subTotal.
+    pass
+
+def get_orderlines_for_order(order_id):
+    with session_scope() as ss:
+        line_query = ss.query(OrderLineItem).filter(OrderLineItem.order_id==order_id)
+        line_query = line_query.all()
+    return line_query
+
+#######################################################
 # Get all my orders.
 def get_users_orders(userId):
     pass
+
+
 
 # Gets all the money actions we've done for them.
 def get_users_transactions(userId):

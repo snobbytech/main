@@ -643,8 +643,12 @@ class OrderLineItem(ModelBase):
     # Note that we don't have a notion of "quantity". We want every instance of a dish to
     # have its own line - so it's easier to order a Chicken Pad Thai and a Beef Pad Thai too.
 
+    # The price of the item without any adjustments or addons.
+    begin_price = Column(Float)
+
     # Price after all adjustments.
     end_price = Column(Float)
+
 
     # Positive or negative. Usually negative, because we could have a promotion or something.
     adjustments = Column(Float)
@@ -664,6 +668,8 @@ class OrderLineItem(ModelBase):
             self.name = props['name']
         if 'dish_id' in props:
             self.dish_id = props['dish_id']
+        if 'begin_price' in props:
+            self.begin_price = props['begin_price']
         if 'end_price' in props:
             self.end_price = props['end_price']
         if 'adjustments' in props:
@@ -674,6 +680,11 @@ class OrderLineItem(ModelBase):
             self.addons = props['addons']
         if 'notes' in props:
             self.notes = props['notes']
+
+    def validate(self):
+        # TODO: do this.
+        # Pretty important to maintain consistency here.
+        pass
 
     def public_fields(self):
         return ['id', 'order_id', 'name', 'dish_id', 'end_price', 'adjustments', 'adjustment_note', 'notes']
