@@ -455,7 +455,16 @@ class Order(ModelBase):
     # This is more resilient (eg. if dishes change, then we don't want those to be reflected here)
     dishes_stringified = Column(String)
 
+    order_notes    = Column(String)
+
     subtotal       = Column(Float)
+
+    # These adjustments are made on the order-level (vs. on the orderline-level).
+    # The adjustments are independent of the ones on the orderline.
+    adjustments    = Column(Float)
+    adjustment_note = Column(String)
+    promo_code     = Column(String)
+
     taxes          = Column(Float)
     delivery_fee   = Column(Float)
     tip            = Column(Float)
@@ -466,23 +475,28 @@ class Order(ModelBase):
     restaurant_payout = Column(Float)
 
     # Bunch of address fields for delivering.
-    street_number = Column(String)
-    route = Column(String)
+    street_number    = Column(String)
+    route            = Column(String)
     extra_address_id = Column(String)
-    city = Column(String)
-    state = Column(String)
-    zip_code = Column(String)
-    delivery_notes = Column(String)
+    city             = Column(String)
+    state            = Column(String)
+    zip_code         = Column(String)
+    delivery_notes   = Column(String)
 
     # One of a few states, we'll have to figure this out.
     #ORDER_CREATED, RESTAURANT_PREP, OUT_FOR_DELIVERY, DELIVERED, REFUNDED
     delivery_state = Column(String)
 
+    # Stuff like DOORDASH, OLO, etc.
+    delivery_method = Column(String)
+
     # like the stripe payment id or something.
-    payment_id = ''
+    payment_id     = Column(String)
 
     # eg. STRIPE, etc.
-    payment_method = ''
+    payment_method = Column(String)
+
+    pay_state      = Column(String)
 
     def populate_from_dict(self, props):
         if 'source_influencer' in props:
@@ -545,6 +559,38 @@ class Order(ModelBase):
 
     def public_fields(self):
         pass
+
+class OrderLineItem(ModelBase):
+    # An order can have multiple line items, fyi.
+    __tablename__ = 'orderlineitems'
+
+    id       = Column(Integer, primary_key=True)
+
+    order_id = Column(Integer, ForeignKey('orders.id'))
+
+    name     = Column(String)
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
+
+    # Note that we don't have a notion of "quantity". We want every instance of a dish to
+    # have its own line - so it's easier to order a Chicken Pad Thai and a Beef Pad Thai too.
+
+    # Price after all adjustments.
+    end_price = Column(Float)
+
+    # Positive or negative. Usually negative, because we could have a promotion or something.
+    adjustments = Column(Float)
+    adjustment_note = Column(String)
+
+    # Basically, a stringified dict of the addons for the dish. The dict looks like:
+    # {"option": "Beef", "Price": "3"}
+    addons = Column(String)
+
+    # If there are any customizations needed.
+    notes  = Column(String)
+
+
+
+    pass
 
 # TODO: do this.
 # A DishReview can be done by an influencer
