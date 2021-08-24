@@ -209,6 +209,8 @@ class DishCategory(ModelBase):
 #       double entries here...
 #       Also: I think there are better ways of doing this with
 #       sqlalchemy, but too lazy to look it up right now.
+# Note that this exists as a mapping table instead of a field inside the Dish itself,
+# because a dish can be in multiple categories.
 class DishCategoryMap(ModelBase):
     __tablename__ = 'dishcategorymap'
 

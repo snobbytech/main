@@ -134,6 +134,70 @@ def get_arbitrary_dish():
         return ss.query(Dish).first()
     return None
 
+# Mapping DishCategories.
+def add_dish_category(catDict):
+    newCategory = DishCategory()
+    newCategory.populate_from_dict(catDict)
+
+    # TODO: Check existing categories and their ranks, and increment to add.
+    existing_categories = get_restaurant_categories(catDict['restaurant_id'])
+    max_rank = 0
+    for one_category in existing_categories:
+        max_rank = max(max_rank, one_category.rank)
+    # And then make newCategory's rank larger than that.
+    newCategory.rank = max_rank + 1
+    with session_scope() as ss:
+        ss.add(newCategory)
+        ss.flush()
+    return newCategory
+
+def mod_dish_category(catDict):
+    existing_category = get_category(catDict['id'])
+    existing_category.populate_from_dict(catDict)
+    with session_scope() as ss:
+        ss.add(existing_category)
+        ss.flush()
+    return existing_category
+
+def remove_dish_category(catId=None, catDict={}):
+    if not catId:
+        catId = catDict['id']
+    # TODO: implement this.
+
+
+def get_category(category_id):
+    with session_scope() as ss:
+        return ss.query(DishCategory).get(category_id)
+
+def get_dishes_in_category(category_id):
+
+    with session_scope() as ss:
+        dishQuery = ss.query(Dish).join(DishCategoryMap).filter(DishCategoryMap.category_id==category_id)
+        dishQuery = dishQuery.all()
+    return dishQuery
+
+def get_restaurant_categories(restaurant_id):
+    with session_scope() as ss:
+        catQuery = ss.query(DishCategory).filter(DishCategory.restaurant_id==restaurant_id)
+        catQuery = catQuery.all()
+    return catQuery
+
+
+def add_dish_to_category(dish_id, category_id):
+    # Check if the dish is already in there.
+    with session_scope() as ss:
+        mapQuery = ss.query(DishCategoryMap).filter(DishCategoryMap.dish_id==dish_id).filter(DishCatogryMap.category_id==category_id)
+        if mapQuery.get():
+            # Then we already have it.
+            return
+        # Otherwise, we can create a new instance.
+        newMap = DishCategoryMap()
+        newMap.dish_id = dish_id
+        newMap.category_id = category_id
+        ss.add(newMap)
+        ss.flush()
+    return newMap
+
 ###########################################################
 # Restaurants
 def add_restaurant(restaurantDict):
@@ -293,6 +357,8 @@ def get_influencer_local_dishes(userId, lat, lon, milesRadius=5):
 
 def get_local_dishes(lat, lon, milesRadius=5):
     pass
+
+
 
 ###########################################################
 # Initiate order
