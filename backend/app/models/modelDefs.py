@@ -292,6 +292,7 @@ class DishAddons(ModelBase):
 
     # Stuff like, "Protein", "Sauce"
     name = Column(String)
+    dish_id = Column(Integer, ForeignKey('restaurants.id'))
     # For the ordering.
     rank = Column(Integer)
     min_options = Column(Integer, default=0)
@@ -304,6 +305,8 @@ class DishAddons(ModelBase):
     def populate_from_dict(self, props):
         if 'name' in props:
             self.name = props['name']
+        if 'dish_id' in props:
+            self.dish_id = props['dish_id']
         if 'rank' in props:
             self.rank = props['rank']
         if 'min_options' in props:

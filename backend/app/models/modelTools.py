@@ -161,7 +161,12 @@ def remove_dishaddon(addon_id):
     pass
 
 def get_addons_for_dish(dish_id):
-    pass
+    with session_scope() as ss:
+        # Maybe I should also sort this by asc?
+        addons_query = ss.query(DishAddons).filter(DishAddons.dish_id == dish_id)
+        addons_query = addons_query.order_by(DishAddons.rank.asc())
+        addons_query = addons_query.all()
+    return addons_query
 
 
 # Mapping DishCategories.
