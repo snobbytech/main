@@ -40,6 +40,127 @@ def id_dishes(filepath):
     pass
 
 
+# OK, the secret is that we're doing almost the same thing as id_promos.
+# Is that a bad thing? maybe, who knows, don't worry about it man.
+
+# Gonna do a couple of things to make sure we only keep "good" entries.
+
+# We just dont want to deal with this.
+handle_blacklist = [
+    '@traderjoes',
+    'starbucks',
+]
+
+
+handle_blacklist_words = [
+    'tea',
+    'dessert',
+    'matcha',
+]
+
+# Stuff in the description that probably disqualifies a post...
+desc_blacklist_words = [
+    '#homemade',
+    'bakery',
+    # This will not deliver.
+    'ice cream',
+    '#boba',
+    '#japan',
+    '#germany',
+    '#foodtruck'
+    'grocery',
+    '#icecream',
+    'smoothie',
+    'slush',
+    '#dessert',
+
+]
+
+# The ideal case would be if we could find
+location_blacklist = [
+    'tokyo',
+    'japan',
+    'poland',
+    'france',
+    'canada',
+    'montreal',
+    'italy',
+    'costco',
+    'south korea',
+    'switzerland',
+    'australia',
+    'thailand',
+    'spain',
+    'vietnam',
+    'greece',
+    'taiwan',
+
+    ]
+
+def id_restaurants(list_of_dicts, outfile):
+    kept_posts = []
+    for one_dict in list_of_dicts:
+        # Let's actually filter out the ones that don't make it, first.
+        lowercase_post = one_dict['description'].lower()
+        should_keep = True
+
+        for one_keyword in promotion_keywords:
+            if one_keyword in lowercase_post:
+                should_keep = False
+        if 'home' in one_dict['location'].lower():
+            should_keep = False
+        if 'tea' in one_dict['location'].lower():
+            should_keep = False
+
+        # Check the handles.
+        for blh in handle_blacklist:
+            if one_dict['username'] == blh:
+                should_keep = False
+
+        for blwh in handle_blacklist_words:
+            if blwh in one_dict['username'].lower():
+                should_keep = False
+
+        for blwd in desc_blacklist_words:
+            if blwd in lowercase_post:
+                should_keep = False
+        for bll in location_blacklist:
+            if bll in one_dict['location'].lower():
+                should_keep = False
+
+        # Some stupid things...
+
+
+        first_tagged = ''
+        removed_newlines = ' '.join(lowercase_post.split('\n'))
+
+        # Find the first tagged thing.
+        at_loc = removed_newlines.find('@')
+        if at_loc >= 0:
+            short_newlines = removed_newlines[at_loc:]
+            short_newlines = short_newlines.replace(',', ' ')
+            potential_tag = short_newlines.split(' ')[0]
+            first_tagged = potential_tag
+
+        one_dict['inline_desc'] = removed_newlines
+        one_dict['potential_tag'] = first_tagged
+
+        if should_keep:
+            # Find the first tagged section.
+            kept_posts.append(one_dict.copy())
+        else:
+            pass
+
+    with open(outfile, 'w', newline='') as csvfile:
+        fieldnames = ['postUrl', 'location', 'username', 'tag', 'desc']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for one_post in kept_posts:
+            writer.writerow({'postUrl': one_post['postUrl'], 'location': one_post['location'], 'username': one_post['username'], 'tag': one_post['potential_tag'], 'desc': one_post['inline_desc']})
+    print("Done?")
+
+
 # All sequences of words that probably mean they're doing a partnership deal.
 promotion_keywords = [
     'partnering with',
@@ -121,6 +242,9 @@ def main():
 
     # first
     parser.add_argument('--infile', default='first_lines.csv')
+    # Partner mode: ID the posts that are about partnerships.
+    # FOOD: ID the posts that should show food from restaurants.
+    parser.add_argument('--mode', default='PARTNER')
     parser.add_argument('--outfile', default='outfile.csv')
     # TODO: add options so they can select which function to call.
     args = parser.parse_args()
@@ -145,7 +269,10 @@ def main():
 
 
     # Now that we've gone and kept our links, let's pass these over to the promotion spotter...
-    id_promotions(kept_dicts, args.outfile)
+    if args.mode == 'PARTNER':
+        id_promotions(kept_dicts, args.outfile)
+    elif args.mode == 'RESTAURANTS':
+        id_restaurants(kept_dicts, args.outfile)
     print("Done")
 
 
