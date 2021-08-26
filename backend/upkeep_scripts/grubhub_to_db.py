@@ -2,14 +2,14 @@
 
 """
 Given a grubhub url (what the restaurant is), we'll go in and
-grab the restaurant's properties and menu. All that good stuff.
-And output it all in our own nice little JSON file.
+grab the restaurant's properties and menu.
 
-I made two text files: thai_restaurant.txt and thai_dish.txt that have the raw data
-for thai villa in NYC, to make sure our ish works.
 
-Sample usage:
-dchen@dchen-ThinkPad-X1-Carbon-6th:~/snobby_main/helper_tools/scraping_restaurants$ ./grubhubber.py --url https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205
+Step 1: I'm going to output its menu to a JSON file.
+
+Step 2: I'm going to straight up
+
+Step 3: bypass the JSON output and just modify the database, end to end.
 
 
 """
@@ -20,6 +20,9 @@ import json
 import argparse
 
 
+
+##############################################################################
+# Stuff for accessing grubhub.
 cur_access_token = ''
 
 # In the future, we can probably save these access- and refresh- tokens.
@@ -28,8 +31,6 @@ cur_access_token = ''
 
 def get_access_token():
     global cur_access_token
-
-
     ac_headers = {
         'authority': 'api-gtm.grubhub.com',
         'authorization': 'Bearer aaa',
@@ -111,7 +112,7 @@ perdish_headers = {
     'authority': 'api-gtm.grubhub.com',
     'cache-control': 'no-cache',
     'accept': 'application/json',
-    'authorization': '',
+    'authorization': 'Bearer {}',
     'perimeter-x': 'eyJ1IjoiZDAzMWM5OTAtMDFjZC0xMWVjLTg3YTktMzE2ZTYzN2JiMGYxIiwidiI6ImQwMzQyMmVhLTAxY2QtMTFlYy05ODZkLTUzNWE0MzRjNTc1OSIsInQiOjE2Mjk0ODIxMTQyOTYsImgiOiI3MTg3OGNhZGU3YjNhYWI5YWUzNjVjMGFlMmNkYTFlYjU1NGJhODVkMmE0MTg5MTU2NGU0ZjdiMzZiMWIyZTcwIn0=',
     'if-modified-since': '0',
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
@@ -130,7 +131,7 @@ perdish_params = (
     ('version', '4'),
 )
 
-perdish_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant}/menu_items/{item_id}'
+perdish_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant_id}/menu_items/{item_id}'
 
 
 #NB. Original query string below. It seems impossible to parse and
@@ -169,7 +170,7 @@ def parse_dish(dish_txt):
         perdish_options.append(one_option)
     return perdish_options
 
-def parse_rest(rest_txt):
+def parse_rest(rest_id, rest_txt):
     rest_dict = json.loads(rest_txt)
 
     rest = rest_dict['restaurant']
@@ -230,18 +231,19 @@ def parse_rest(rest_txt):
             # But it's inefficient. It means we have to make a lot of network calls every time we want to scrape a restaurant.
             # Oh well. In the long term, we can probably do a best-guess re: whether a dish "should" have extra options.
 
-            if False:
-                perdish_url = perdish_tgt.format(id_num, dish_kept['id'])
-                # I think the extra things here are about the same.
-                perdish_response = requests.get(perdish_url, headers=header, params=perdish_params)
+            perdish_url = perdish_tgt.format(restaurant_id=rest_id, item_id=dish_kept['id'])
+            # I think the extra things here are about the same.
+            perdish_response = requests.get(perdish_url, headers=perdish_headers, params=perdish_params)
 
-                if perdish_response.status_code != 200:
-                    # Something broke, alert and be quiet.
-                    print("Something broke when grabbing {}, exiting".format(perdish_url))
-                    sys.exit()
-                # Otherwise, parse the perdish stuff.
-                dish_options = parse_dish(perdish_response.text)
-                dish_kept['options'] = dish_options
+            if perdish_response.status_code != 200:
+                # Something broke, alert and be quiet.
+                print(perdish_url)
+                print(perdish_headers)
+                print("Something broke when grabbing {}, exiting".format(perdish_url))
+                sys.exit()
+            # Otherwise, parse the perdish stuff.
+            dish_options = parse_dish(perdish_response.text)
+            dish_kept['options'] = dish_options
             dishes.append(dish_kept)
         cat_dict['dishes'] = dishes
         menu_kept.append(cat_dict)
@@ -280,26 +282,26 @@ def scrape_restaurant(github_url):
         print(gh_response.status_code)
         sys.exit()
 
-    x = parse_rest(gh_response.text)
+    x = parse_rest(id_num, gh_response.text)
     return(x)
-
-
-#get_access_token()
-
-# All right, I guess this means I can start
-#grubhub_url = 'https://www.grubhub.com/restaurant/thai-villa-5-e-19th-st-new-york/340205'
-#grub_dicts = scrape_restaurant(grubhub_url)
-#print(grub_dicts)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', required=True)
+    # Values: JSON, DB, ALL
+    parser.add_argument('--mode', required=True)
+    parser.add_argument('--iofile', default='grubhubs.json')
     args = parser.parse_args()
 
-    get_access_token()
-    grub_dicts = scrape_restaurant(args.url)
-    print(grub_dicts)
+    if args.mode == 'JSON':
+        get_access_token()
+        grub_dicts = scrape_restaurant(args.url)
+        # Write grub_dicts.
+        with open(args.iofile, 'w') as iof:
+            json.dump(grub_dicts, iof)
+        print("Done")
+
 
 if __name__ == '__main__':
     main()
