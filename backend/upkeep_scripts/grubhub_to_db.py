@@ -125,13 +125,46 @@ perdish_headers = {
 }
 
 perdish_params = (
-    ('time', '1629481712797'),
+    ('time', '1630036032687'),
     ('hideUnavailableMenuItems', 'true'),
     ('orderType', 'standard'),
     ('version', '4'),
 )
 
 perdish_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant_id}/menu_items/{item_id}'
+
+
+pd_headers = {
+    'authority': 'api-gtm.grubhub.com',
+    'cache-control': 'no-cache',
+    'accept': 'application/json',
+    'authorization': 'Bearer 05b79a24-d8ce-445f-9185-c3ab4f8d67b6',
+    'perimeter-x': 'eyJ1IjoiYTUzYjc4OTAtMDZiOC0xMWVjLThiMzMtZWQyNWIzN2NmN2RhIiwidiI6ImFkZTIyM2ZlLTAxMzMtMTFlYy1iNjViLTQ0NDc0ZDYzNDM3MiIsInQiOjE2MzAwMzY1MzA0ODMsImgiOiJlOTZhYzQxZTNhMThmOTg3MzhlYjllODM1MDJhMmE3ZWRlMjM3YzI1NjFiMjRmMjZmNTgzMTI3Mjg1MzAxN2U2In0=',
+    'if-modified-since': '0',
+    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
+    'origin': 'https://www.grubhub.com',
+    'sec-fetch-site': 'same-site',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-dest': 'empty',
+    'referer': 'https://www.grubhub.com/',
+    'accept-language': 'en-US,en;q=0.9',
+}
+
+pd_params = (
+    ('time', '1630036032687'),
+    ('hideUnavailableMenuItems', 'true'),
+    ('orderType', 'standard'),
+    ('version', '4'),
+)
+
+pd_tgt = 'https://api-gtm.grubhub.com/restaurants/{restaurant_id}/menu_items/{item_id}'
+#pd_response = requests.get(, headers=headers, params=params)
+
+#NB. Original query string below. It seems impossible to parse and
+#reproduce query strings 100% accurately so the one below is given
+#in case the reproduced version is not "correct".
+# response = requests.get('https://api-gtm.grubhub.com/restaurants/2428407/menu_items/3474491997?time=1630036032687&hideUnavailableMenuItems=true&orderType=standard&version=4', headers=headers)
+
 
 
 #NB. Original query string below. It seems impossible to parse and
@@ -211,14 +244,19 @@ def parse_rest(rest_id, rest_txt):
     perdish_access_headers = perdish_headers.copy()
     perdish_access_headers['authorization'] = perdish_access_headers['authorization'].format(cur_access_token)
 
+
     for one_item in menu:
+
         cat_dict = {}
         cat_dict['available'] = one_item['available']
         cat_dict['name'] = one_item['name']
-        # Now get the list of dishes.
+
+        # Now get the list of dish3es.
         dish_list = one_item['menu_item_list']
         dishes = []
         for one_dish in dish_list:
+            #print("DISH looks like ")
+            #print(one_dish)
             dish_kept = {}
             dish_kept['avalable'] = one_dish['available']
             dish_kept['name'] = one_dish['name']
@@ -233,14 +271,14 @@ def parse_rest(rest_id, rest_txt):
 
             perdish_url = perdish_tgt.format(restaurant_id=rest_id, item_id=dish_kept['id'])
             # I think the extra things here are about the same.
-            perdish_response = requests.get(perdish_url, headers=perdish_headers, params=perdish_params)
+            perdish_response = requests.get(perdish_url, headers=perdish_access_headers, params=perdish_params)
 
             if perdish_response.status_code != 200:
                 # Something broke, alert and be quiet.
-                print(perdish_url)
-                print(perdish_headers)
+                print(perdish_response)
                 print("Something broke when grabbing {}, exiting".format(perdish_url))
                 sys.exit()
+            #print("Got perdish info for {}".format(one_dish['name']))
             # Otherwise, parse the perdish stuff.
             dish_options = parse_dish(perdish_response.text)
             dish_kept['options'] = dish_options
