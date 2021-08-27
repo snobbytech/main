@@ -290,8 +290,8 @@ class Dish(ModelBase):
         if (not self.restaurant_id):
             return (False, "Every dish needs to be at a restaurant")
 
-        if self.price <= 0:
-            return (False, "Dish {} price {} must be positive".format(self.id, self.price))
+        if self.price < 0:
+            return (False, "Dish {} price {} must not be negative".format(self.id, self.price))
 
         return (True, "")
 

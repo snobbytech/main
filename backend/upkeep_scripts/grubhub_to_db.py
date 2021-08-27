@@ -468,6 +468,12 @@ def main():
         #print(grub_dicts)
         db_populate_rest(grub_dicts)
         # Pass this along to the thing that's updating our restaurant/menu...
+    elif args.mode == 'ALL':
+        # We just do the whole thing end to end...
+        get_access_token()
+        grub_dicts = scrape_restaurant(args.url)
+        db_populate_rest(grub_dicts)
+        # Fin.
 
 
 if __name__ == '__main__':
