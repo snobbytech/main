@@ -221,8 +221,8 @@ def get_restaurant_categories(restaurant_id):
 def add_dish_to_category(dish_id, category_id):
     # Check if the dish is already in there.
     with session_scope() as ss:
-        mapQuery = ss.query(DishCategoryMap).filter(DishCategoryMap.dish_id==dish_id).filter(DishCatogryMap.category_id==category_id)
-        if mapQuery.get():
+        mapQuery = ss.query(DishCategoryMap).filter(DishCategoryMap.dish_id==dish_id).filter(DishCategoryMap.category_id==category_id).all()
+        if len(mapQuery) > 0:
             # Then we already have it.
             return
         # Otherwise, we can create a new instance.
@@ -291,8 +291,6 @@ def get_restaurant(restaurantId):
 
 def get_restaurant_from_urlname(urlName):
     with session_scope() as ss:
-        print(urlName)
-        print("poop")
         return ss.query(Restaurant).filter(Restaurant.url_name==urlName).first()
     return None
 

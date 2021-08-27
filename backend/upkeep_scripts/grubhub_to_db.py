@@ -203,7 +203,6 @@ def parse_dish(dish_txt):
         one_option['name'] = one_category['name']
         one_option['max_options'] = one_category['max_choice_options']
         one_option['min_options'] = one_category['min_choice_options']
-        # There's also a list, poopity scoop.
         option_values = []
         for tmp_option in one_category['choice_option_list']:
             option_values.append({'name': tmp_option['description'], 'price': tmp_option['price']['amount']})
@@ -341,7 +340,6 @@ def db_populate_rest(rest_dicts):
 
     # First step: populate the restaurant data.
     rest_dict = {}
-    print(rest_dicts.keys())
     rest_dict['name']            = rest_dicts['rest']['name']
     # TODO: let modelTools make sure this doesn't overlap with anything.
     rest_dict['phone']            = rest_dicts['rest']['phone']
@@ -410,8 +408,30 @@ def db_populate_rest(rest_dicts):
             dish_dict['grubhub_id'] = one_dish['id']
             # OK, add this to the db now...
             dish_obj = mt.add_dish(dish_dict)
-            print("OK, added {}".format(dish_dict))
+            #print("OK, added {}".format(dish_dict))
 
+            # Now, let's add the addons, if there are any.
+            addon_rank = 0
+            for one_addon in one_dish['options']:
+                addon_dict = {}
+                addon_dict['name'] = one_addon['name']
+                addon_dict['dish_id'] = dish_obj.id
+                addon_dict['rank'] = addon_rank
+                addon_dict['min_options'] = one_addon['min_options']
+                addon_dict['max_options'] = one_addon['max_options']
+                # Get the options. But change the price to normal units.
+                for one_option in one_addon['options']:
+                    one_option['price'] = one_option['price']/100
+                addon_dict['options'] = json.dumps(one_addon['options'])
+                # OK, now add it to the db also
+                addon_obj = mt.add_dishaddon(addon_dict)
+                # Now, update rank.
+                #print("Added addon...", addon_dict)
+                addon_rank += 1
+
+            # Now, let's do the dish to category map?
+            mt.add_dish_to_category(dish_obj.id, cat_obj.id)
+            #print("Mapped the category too.")
         cur_rank += 1
 
 

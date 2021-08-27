@@ -227,6 +227,11 @@ class DishCategoryMap(ModelBase):
     dish_id = Column(Integer, ForeignKey('dishes.id'))
     category_id = Column(Integer, ForeignKey('dishcategories.id'))
 
+    def populate_from_dict(self, props):
+        if 'dish_id' in props:
+            self.dish_id = props['dish_id']
+        if 'category_id' in props:
+            self.category_id = props['category_id']
 
 # TODO (important): allow for dish modifications. Stuff like,
 # add an egg, what sauce, etc. Basically need a way for this to be easily
@@ -302,7 +307,7 @@ class DishAddons(ModelBase):
 
     # Stuff like, "Protein", "Sauce"
     name = Column(String)
-    dish_id = Column(Integer, ForeignKey('restaurants.id'))
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
     # For the ordering.
     rank = Column(Integer)
     min_options = Column(Integer, default=0)
@@ -320,7 +325,7 @@ class DishAddons(ModelBase):
         if 'rank' in props:
             self.rank = props['rank']
         if 'min_options' in props:
-            self.min_rank = props['min_rank']
+            self.min_options = props['min_options']
         if 'max_options' in props:
             self.max_options = props['max_options']
         if 'options' in props:
