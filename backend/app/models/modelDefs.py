@@ -193,11 +193,50 @@ class UserFaveRestaurants(ModelBase):
 
 # Different dishes at different restaurants.
 
+
+# Note: in general, a dish can be a member of multiple categories.
+class DishCategory(ModelBase):
+    __tablename__ = 'dishcategories'
+    id = Column(Integer, primary_key=True)
+
+
+    name = Column(String)
+    # How to sort categories when displaying a menu
+    rank = Column(Integer)
+    restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
+
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'rank' in props:
+            self.rank = props['rank']
+        if 'restaurant_id' in props:
+            self.restaurant_id = props['restaurant_id']
+
+
+# Note: when implementing population, I should make sure there arent
+#       double entries here...
+#       Also: I think there are better ways of doing this with
+#       sqlalchemy, but too lazy to look it up right now.
+# Note that this exists as a mapping table instead of a field inside the Dish itself,
+# because a dish can be in multiple categories.
+class DishCategoryMap(ModelBase):
+    __tablename__ = 'dishcategorymap'
+
+    id = Column(Integer, primary_key=True)
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
+    category_id = Column(Integer, ForeignKey('dishcategories.id'))
+
+    def populate_from_dict(self, props):
+        if 'dish_id' in props:
+            self.dish_id = props['dish_id']
+        if 'category_id' in props:
+            self.category_id = props['category_id']
+
 # TODO (important): allow for dish modifications. Stuff like,
 # add an egg, what sauce, etc. Basically need a way for this to be easily
 # done for the restaurant
 class Dish(ModelBase):
-
     __tablename__ = 'dishes'
     # I don't think this needs any dumb hash anyway.
     id = Column(Integer, primary_key=True)
@@ -220,6 +259,10 @@ class Dish(ModelBase):
     # This cannot be empty.
     main_photo = Column(String)
 
+    # Just in case, going to keep this in here.
+    grubhub_id = Column(String)
+    # There will probably be lines here for ubereats and dd.
+
     # Dishes will need some amount of scoring associated with them..
 
     def populate_from_dict(self, props):
@@ -237,6 +280,8 @@ class Dish(ModelBase):
             self.num_views = props['num_views']
         if 'main_photo' in props:
             self.main_photo = props['main_photo']
+        if 'grubhub_id' in props:
+            self.grubhub_id = props['grubhub_id']
 
     def validate(self):
         if (not self.name):
@@ -245,13 +290,49 @@ class Dish(ModelBase):
         if (not self.restaurant_id):
             return (False, "Every dish needs to be at a restaurant")
 
-        if self.price <= 0:
-            return (False, "Dish {} price {} must be positive".format(self.id, self.price))
+        if self.price < 0:
+            return (False, "Dish {} price {} must not be negative".format(self.id, self.price))
 
         return (True, "")
 
     def public_fields(self):
         return ['id', 'name', 'restaurant_id', 'price', 'description', 'category', 'num_views', 'num_hearts', 'main_photo']
+
+# Note: this is an entire list of addons. For example, pad thai can have
+# Chicken, Beef, Mock Duck options. For one such category, we contain it in one DishAddons
+# object.
+class DishAddons(ModelBase):
+    __tablename__ = 'dishaddons'
+    id = Column(Integer, primary_key=True)
+
+    # Stuff like, "Protein", "Sauce"
+    name = Column(String)
+    dish_id = Column(Integer, ForeignKey('dishes.id'))
+    # For the ordering.
+    rank = Column(Integer)
+    min_options = Column(Integer, default=0)
+    max_options = Column(Integer)
+
+    # Going to just stringify and unstringify these.
+    # Going to be a list of dicts, "name", "price".
+    options = Column(String)
+
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'dish_id' in props:
+            self.dish_id = props['dish_id']
+        if 'rank' in props:
+            self.rank = props['rank']
+        if 'min_options' in props:
+            self.min_options = props['min_options']
+        if 'max_options' in props:
+            self.max_options = props['max_options']
+        if 'options' in props:
+            self.options = props['options']
+
+    def public_fields(self):
+        return ['id', 'name', 'rank', 'min_options', 'max_options', 'options']
 
 # Pretty simple, right.
 class Restaurant(ModelBase):
@@ -276,6 +357,8 @@ class Restaurant(ModelBase):
 
     # eg. Toast
     pos_options = Column(String)
+
+    available_pickup = Column(Boolean)
 
     # Full address string.
     street_address = Column(String)
@@ -304,6 +387,32 @@ class Restaurant(ModelBase):
     # Needs to be changed eventually.
     category  = Column(String)
 
+    # This is a stringified version of an hours_open thing.
+    # Note that this is given in like, UTC Time or something.
+    # TODO: figure this ish out.
+    hours     = Column(String)
+    hours_pickup = Column(String)
+    # I'm guessing it's like,
+    pickup_cutoff = Column(Integer)
+
+    # Time range that these pickups tend to be.
+    pickup_estimate_min = Column(Integer)
+    pickup_estimate_max = Column(Integer)
+
+
+    # This is in the number multipled. So, 1% is 0.01
+    sales_tax_rate = Column(Float)
+    delivery_fee_taxable = Column(Boolean)
+
+    # This is in dollars.
+    order_minimum = Column(Float)
+
+    # For data syncing.
+    grubhub_url  = Column(String)
+    ubereats_url = Column(String)
+    dd_url       = Column(String)
+    yelp_url     = Column(String)
+
     # Will need scoring parameters too.
 
     # TODO: probably need some fees in here.
@@ -319,6 +428,9 @@ class Restaurant(ModelBase):
             self.email = props['email']
         if 'delivery_options' in props:
             self.delivery_options = props['delivery_options']
+        if 'available_pickup' in props:
+            self.available_pickup = props['available_pickup']
+
         if 'pos_options' in props:
             self.pos_options = props['pos_options']
 
@@ -350,21 +462,48 @@ class Restaurant(ModelBase):
 
         if 'category' in props:
             self.category = props['category']
+        if 'hours' in props:
+            self.hours = props['hours']
+        if 'hours_pickup' in props:
+            self.hours_pickup = props['hours_pickup']
+        if 'pickup_cutoff' in props:
+            self.pickup_cutoff = props['pickup_cutoff']
+        if 'pickup_estimate_min' in props:
+            self.pickup_estimate_min = props['pickup_estimate_min']
+        if 'pickup_estimate_max' in props:
+            self.pickup_estimate_max = props['pickup_estimate_max']
+        if 'sales_tax_rate' in props:
+            self.sales_tax_rate = props['sales_tax_rate']
+        if 'delivery_fee_taxable' in props:
+            self.delivery_fee_taxable = props['delivery_fee_taxable']
+        if 'order_minimum' in props:
+            self.order_minimum = props['order_minimum']
+
+        if 'grubhub_url' in props:
+            self.grubhub_url = props['grubhub_url']
+        if 'ubereats_url' in props:
+            self.ubereats_url = props['ubereats_url']
+        if 'dd_url' in props:
+            self.dd_url = props['dd_url']
+        if 'yelp_url' in props:
+            self.yelp_url = props['yelp_url']
 
     # Returns a 2-tuple (bool, message)
     def validate(self):
-        if (not self.name) or (not self.phone) or not (self.email):
-            return (False, "Crucial info is missing: name {} email {} phone {} must all be filled".format(self.name, self.email, self.phone))
+        # Don't require email right now.
+        if (not self.name) or (not self.phone):
+            return (False, "Crucial info is missing: name {} phone {} must all be filled".format(self.name, self.phone))
 
-        if (not self.delivery_options) or (not self.pos_options):
-            return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
+        # When we go live, this should definitely be handled to some extent.
+#        if (not self.delivery_options) or (not self.pos_options):
+#            return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
 
         if not (self.url_name):
             return (False, "Creating a restaurant: empty url_names are not allowed")
         return (True, "")
 
     def public_fields(self):
-        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'street_address', 'zip_code', 'lat', 'lon', 'num_hearts', 'category']
+        return ['name', 'url_name', 'phone', 'delivery_options', 'pos_options', 'available_pickup', 'street_address', 'zip_code', 'lat', 'lon', 'num_hearts', 'category', 'hours', 'hours_pickup', 'pickup_cutoff', 'pickup_estimate_min', 'pickup_estimate_max', 'sales_tax_rate', 'delivery_fee_taxable', 'order_minimum']
 
 # A single order.
 class Order(ModelBase):
@@ -387,7 +526,16 @@ class Order(ModelBase):
     # This is more resilient (eg. if dishes change, then we don't want those to be reflected here)
     dishes_stringified = Column(String)
 
+    order_notes    = Column(String)
+
     subtotal       = Column(Float)
+
+    # These adjustments are made on the order-level (vs. on the orderline-level).
+    # The adjustments are independent of the ones on the orderline.
+    adjustments    = Column(Float)
+    adjustment_note = Column(String)
+    promo_code     = Column(String)
+
     taxes          = Column(Float)
     delivery_fee   = Column(Float)
     tip            = Column(Float)
@@ -398,23 +546,28 @@ class Order(ModelBase):
     restaurant_payout = Column(Float)
 
     # Bunch of address fields for delivering.
-    street_number = Column(String)
-    route = Column(String)
+    street_number    = Column(String)
+    route            = Column(String)
     extra_address_id = Column(String)
-    city = Column(String)
-    state = Column(String)
-    zip_code = Column(String)
-    delivery_notes = Column(String)
+    city             = Column(String)
+    state            = Column(String)
+    zip_code         = Column(String)
+    delivery_notes   = Column(String)
 
     # One of a few states, we'll have to figure this out.
     #ORDER_CREATED, RESTAURANT_PREP, OUT_FOR_DELIVERY, DELIVERED, REFUNDED
     delivery_state = Column(String)
 
+    # Stuff like DOORDASH, OLO, etc.
+    delivery_method = Column(String)
+
     # like the stripe payment id or something.
-    payment_id = ''
+    payment_id     = Column(String)
 
     # eg. STRIPE, etc.
-    payment_method = ''
+    payment_method = Column(String)
+
+    pay_state      = Column(String)
 
     def populate_from_dict(self, props):
         if 'source_influencer' in props:
@@ -429,8 +582,16 @@ class Order(ModelBase):
             self.dish_ids = props['dish_ids']
         if 'dishes_stringified' in props:
             self.dishes_stringified = props['dishes_stringified']
+        if 'order_notes' in props:
+            self.order_notes = props['order_notes']
         if 'subtotal' in props:
             self.subtotal = float(props['subtotal'])
+        if 'adjustments' in props:
+            self.adjustments = float(props['adjustments'])
+        if 'adjustment_note' in props:
+            self.adjustment_note = props['adjustment_note']
+        if 'promo_code' in props:
+            self.promo_code = props['promo_code']
         if 'local_taxes' in props:
             self.taxes = float(props['local_taxes'])
         if 'delivery_fee' in props:
@@ -465,18 +626,86 @@ class Order(ModelBase):
             self.delivery_notes = props['delivery_notes']
         if 'delivery_state' in props:
             self.delivery_state = props['delivery_state']
+        if 'delivery_method' in props:
+            self.delivery_method = props['delivery_method']
 
         if 'payment_id' in props:
             self.payment_id = props['payment_id']
         if 'payment_method' in props:
             self.payment_method = props['payment_method']
+        if 'pay_state' in props:
+            self.pay_state = props['pay_state']
 
     def validate(self):
         # This doesn't need to be a big deal... so let's keep it simple for now.
         return (True, "")
 
+    # This needs to be done, m8.
     def public_fields(self):
+        return ['source_influencer', 'restaurant_id', 'orderer_email', 'orderer_phone', 'dish_ids', 'dishes_stringified', 'order_notes', 'subtotal', 'adjustments', 'adjustment_note', 'promo_code', 'local_taxes', 'delivery_fee', 'tip', 'dasher_tip', 'total_cost', 'our_fees', 'influencers_cut', 'restaurant_payout', 'street_number', 'route', 'extra_addrses_id', 'city', 'state', 'zip_code', 'delivery_notes', 'delivery_state', 'delivery_method', 'payment_method', 'pay_state']
         pass
+
+class OrderLineItem(ModelBase):
+    # An order can have multiple line items, fyi.
+    __tablename__ = 'orderlineitems'
+
+    id       = Column(Integer, primary_key=True)
+
+    order_id = Column(Integer, ForeignKey('orders.id'))
+
+    name      = Column(String)
+    dish_id   = Column(Integer, ForeignKey('dishes.id'))
+    dish_name = Column(String)
+
+    # Note that we don't have a notion of "quantity". We want every instance of a dish to
+    # have its own line - so it's easier to order a Chicken Pad Thai and a Beef Pad Thai too.
+
+    # The price of the item without any adjustments or addons.
+    begin_price = Column(Float)
+
+    # Price after all adjustments.
+    end_price = Column(Float)
+
+
+    # Positive or negative. Usually negative, because we could have a promotion or something.
+    adjustments = Column(Float)
+    adjustment_note = Column(String)
+
+    # Basically, a stringified dict of the addons for the dish. The dict looks like:
+    # {"option": "Beef", "Price": "3"}
+    addons = Column(String)
+
+    # If there are any customizations needed.
+    notes  = Column(String)
+
+    def populate_from_dict(self, props):
+        if 'order_id' in props:
+            self.order_id = props['order_id']
+        if 'name' in props:
+            self.name = props['name']
+        if 'dish_id' in props:
+            self.dish_id = props['dish_id']
+        if 'begin_price' in props:
+            self.begin_price = props['begin_price']
+        if 'end_price' in props:
+            self.end_price = props['end_price']
+        if 'adjustments' in props:
+            self.adjustments = props['adjustments']
+        if 'adjustment_note' in props:
+            self.adjustment_note = props['adjustment_note']
+        if 'addons' in props:
+            self.addons = props['addons']
+        if 'notes' in props:
+            self.notes = props['notes']
+
+    def validate(self):
+        # TODO: do this.
+        # Pretty important to maintain consistency here.
+        pass
+
+    def public_fields(self):
+        return ['id', 'order_id', 'name', 'dish_id', 'end_price', 'adjustments', 'adjustment_note', 'notes']
+
 
 # TODO: do this.
 # A DishReview can be done by an influencer

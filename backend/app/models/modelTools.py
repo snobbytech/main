@@ -5,7 +5,7 @@ TODO: test all of this. Don't be a fool.
 
 """
 
-from .modelDefs import to_public_dict, User, Dish, Restaurant, Order, UserFaveDishes
+from .modelDefs import *
 from .modelSetup import session_scope, con, dropAllTables
 from . import modelBase
 
@@ -134,6 +134,105 @@ def get_arbitrary_dish():
         return ss.query(Dish).first()
     return None
 
+# Dish Addons (eg. "Beef" option, etc.
+def add_dishaddon(addonDict):
+    newAddon = DishAddons()
+    newAddon.populate_from_dict(addonDict)
+    with session_scope() as ss:
+        ss.add(newAddon)
+        ss.flush()
+    return newAddon
+
+def mod_dishaddon(addonDict):
+    existing_addon = get_dishaddon(addonDict['id'])
+    existing_addon.populate_from_dict(addonDict)
+    with session_scope() as ss:
+        # Grab existing, modify it.
+        ss.add(existing_addon)
+        ss.flush()
+    return existing_addon
+
+def get_dishaddon(addon_id):
+    with session_scope() as ss:
+        return ss.query(DishAddons).get(addon_id)
+
+def remove_dishaddon(addon_id):
+    # TODO: do this.
+    pass
+
+def get_addons_for_dish(dish_id):
+    with session_scope() as ss:
+        # Maybe I should also sort this by asc?
+        addons_query = ss.query(DishAddons).filter(DishAddons.dish_id == dish_id)
+        addons_query = addons_query.order_by(DishAddons.rank.asc())
+        addons_query = addons_query.all()
+    return addons_query
+
+
+# Mapping DishCategories.
+def add_dish_category(catDict):
+    newCategory = DishCategory()
+    newCategory.populate_from_dict(catDict)
+
+    # TODO: Check existing categories and their ranks, and increment to add.
+    existing_categories = get_restaurant_categories(catDict['restaurant_id'])
+    max_rank = 0
+    for one_category in existing_categories:
+        max_rank = max(max_rank, one_category.rank)
+    # And then make newCategory's rank larger than that.
+    newCategory.rank = max_rank + 1
+    with session_scope() as ss:
+        ss.add(newCategory)
+        ss.flush()
+    return newCategory
+
+def mod_dish_category(catDict):
+    existing_category = get_category(catDict['id'])
+    existing_category.populate_from_dict(catDict)
+    with session_scope() as ss:
+        ss.add(existing_category)
+        ss.flush()
+    return existing_category
+
+def remove_dish_category(catId=None, catDict={}):
+    if not catId:
+        catId = catDict['id']
+    # TODO: implement this.
+
+
+def get_category(category_id):
+    with session_scope() as ss:
+        return ss.query(DishCategory).get(category_id)
+
+def get_dishes_in_category(category_id):
+
+    with session_scope() as ss:
+        dishQuery = ss.query(Dish).join(DishCategoryMap).filter(DishCategoryMap.category_id==category_id)
+        dishQuery = dishQuery.all()
+    return dishQuery
+
+def get_restaurant_categories(restaurant_id):
+    with session_scope() as ss:
+        catQuery = ss.query(DishCategory).filter(DishCategory.restaurant_id==restaurant_id)
+        catQuery = catQuery.all()
+    return catQuery
+
+
+def add_dish_to_category(dish_id, category_id):
+    # Check if the dish is already in there.
+    with session_scope() as ss:
+        mapQuery = ss.query(DishCategoryMap).filter(DishCategoryMap.dish_id==dish_id).filter(DishCategoryMap.category_id==category_id).all()
+        if len(mapQuery) > 0:
+            # Then we already have it.
+            return
+        # Otherwise, we can create a new instance.
+        newMap = DishCategoryMap()
+        newMap.dish_id = dish_id
+        newMap.category_id = category_id
+        ss.add(newMap)
+        ss.flush()
+    return newMap
+
 ###########################################################
 # Restaurants
 def add_restaurant(restaurantDict):
@@ -192,8 +291,6 @@ def get_restaurant(restaurantId):
 
 def get_restaurant_from_urlname(urlName):
     with session_scope() as ss:
-        print(urlName)
-        print("poop")
         return ss.query(Restaurant).filter(Restaurant.url_name==urlName).first()
     return None
 
@@ -294,11 +391,12 @@ def get_influencer_local_dishes(userId, lat, lon, milesRadius=5):
 def get_local_dishes(lat, lon, milesRadius=5):
     pass
 
+
+
 ###########################################################
 # Initiate order
 
 def make_order(orderDict):
-
     newOrder = Order()
     newOrder.populate_from_dict(orderDict)
     valid, msg = newOrder.validate()
@@ -311,7 +409,6 @@ def make_order(orderDict):
 
 # What does this mean?
 def update_order(orderId, orderDict):
-
     the_order = get_order(orderId)
     if the_order:
         the_order.populate_from_dict(orderDict)
@@ -323,14 +420,68 @@ def update_order(orderId, orderDict):
             return the_order
     return None
 
+# Make sure everything adds up between Order and OrderLines.
+def recalc_order_orderlines(order_id):
+    # TODO: implement this?
+
+    running_subtotal = 0
+    all_orderlines = get_orderlines_for_order(order_id)
+    the_order = get_order(order_id)
+    for one_orderline in all_orderlines:
+        running_subtotal += one_orderline.end_price
+    # Update the order now.
+    the_order.subtotal = running_subtotal
+    with session_scope() as ss:
+        ss.add(the_order)
+
+
 def get_order(orderId):
     with session_scope() as ss:
         return ss.query(Order).get(orderId)
     return None
 
+# Operations on OrderLines.
+def add_orderline(orderlineDict):
+    orderline = OrderLineItem()
+    orderline.populate_from_dict(orderlineDict)
+    with session_scope() as ss:
+        ss.add(orderline)
+        ss.flush()
+    return orderline
+
+def mod_orderline(orderlineDict):
+    orderline = get_orderline(orderlineDict['id'])
+    orderline.populate_from_dict(orderlineDict)
+    with session_scope() as ss:
+        ss.add(orderline)
+        ss.flush()
+    # Force a recalc.
+    recalc_order_orderlines(orderlineDict['order_id'])
+
+
+def get_orderline(orderline_id):
+    with session_scope() as ss:
+        orderline = ss.query(OrderLineItem).get(orderline_id)
+    return orderline
+
+
+def remove_orderline(orderline_id):
+    # TODO: implement this.
+    # Also force a recalc of the order subTotal.
+    pass
+
+def get_orderlines_for_order(order_id):
+    with session_scope() as ss:
+        line_query = ss.query(OrderLineItem).filter(OrderLineItem.order_id==order_id)
+        line_query = line_query.all()
+    return line_query
+
+#######################################################
 # Get all my orders.
 def get_users_orders(userId):
     pass
+
+
 
 # Gets all the money actions we've done for them.
 def get_users_transactions(userId):
