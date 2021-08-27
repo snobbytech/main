@@ -7,18 +7,30 @@ grab the restaurant's properties and menu.
 
 Step 1: I'm going to output its menu to a JSON file.
 
+Example usage:
+./grubhub_to_db.py --mode JSON --url https://www.grubhub.com/restaurant/love-burn-130-northwood-dr-south-san-francisco/2428407?=undefined&utm_source=google&utm_medium=cpc&utm_campaign=&utm_term=f%3Aplacesheet%3Afeature_id_fprint%3D17868528579844763466&utm_content=acct_id-3075806372%3Acamp_id-10331808441%3Aadgroup_id-122350726255%3Akwd-1063567739721%3Acreative_id-533614949007%3Aext_id-147051630757%3Amatchtype_id-%3Anetwork-g%3Adevice-c%3Aloc_interest-1014221%3Aloc_physical-9067609&gclid=CjwKCAjw95yJBhAgEiwAmRrutMKX43bB6KKy8zaVl3hkPexFbTDohGB5jLcwUpMNRZjw5KXzSr3zQhoC5AcQAvD_BwE
+
 Step 2: I'm going to straight up
+
+Example usage:
 
 Step 3: bypass the JSON output and just modify the database, end to end.
 
 
 """
-
+import os
 import sys
 import requests
 import json
 import argparse
 
+sys.path.insert(0, os.path.abspath('..'))
+
+os.environ['APP_CONFIG_FILE'] = '../config/dev.py'
+
+from app import flask_app
+from app.models import modelTools as mt
+from app.models.modelDefs import to_public_dict
 
 
 ##############################################################################
@@ -292,10 +304,10 @@ def parse_rest(rest_id, rest_txt):
             'menu': menu_kept}
 
 
-def scrape_restaurant(github_url):
+def scrape_restaurant(grubhub_url):
     # First order: take the url and grab the actual id:
     id_num = ''
-    split_url = github_url.split('/')
+    split_url = grubhub_url.split('/')
     for one_part in split_url:
         if len(one_part):
             id_num = one_part
@@ -315,18 +327,77 @@ def scrape_restaurant(github_url):
 
     if gh_response.status_code != 200:
         # Something broke, alert and be quiet.
-        print("Something broke when grabbing {}, exiting".format(github_url))
+        print("Something broke when grabbing {}, exiting".format(grubhub_url))
         print(gh_response)
         print(gh_response.status_code)
         sys.exit()
 
     x = parse_rest(id_num, gh_response.text)
+    # give it the url too...
+    x['gh_url'] = grubhub_url
     return(x)
+
+def db_populate_rest(rest_dicts):
+
+    # First step: populate the restaurant data.
+    rest_dict = {}
+    print(rest_dicts.keys())
+    rest_dict['name']            = rest_dicts['rest']['name']
+    # TODO: let modelTools make sure this doesn't overlap with anything.
+    rest_dict['url_name']         = '-'.join(rest_dicts['rest']['name'].lower().split(' '))
+    rest_dict['phone']            = rest_dicts['rest']['phone']
+    rest_dict['email']            = ''
+    # Not sure what to put here.
+    rest_dict['delivery_options'] = ''
+    # Not sure what to put here. So putting nothing.
+    rest_dict['pos_options']      = ''
+
+    rest_dict['available_pickup'] = rest_dicts['avail']['available_for_pickup']
+    rest_dict['street_address']   = rest_dicts['rest']['address']['street_address']
+    rest_dict['street_number']    = rest_dicts['rest']['address']['street_address'].split()[0]
+    rest_dict['route']            = ' '.join(rest_dicts['rest']['address']['street_address'].split()[1:])
+    # This could be messed up later on. Not sure.
+    rest_dict['extra_address_id'] = ''
+    rest_dict['city']             = rest_dicts['rest']['address']['locality']
+    rest_dict['state']            = rest_dicts['rest']['address']['region']
+    rest_dict['country']          = rest_dicts['rest']['address']['country']
+    rest_dict['zip_code']         = rest_dicts['rest']['address']['zip']
+    rest_dict['lat']              = rest_dicts['rest']['latitude']
+    rest_dict['lon']              = rest_dicts['rest']['longitude']
+
+    rest_dict['num_hearts']    = 0
+    rest_dict['category']      = ''
+    # Stringifying a json.
+    rest_dict['hours']         = json.dumps(rest_dicts['avail']['hours'])
+    rest_dict['hours_pickup']  = json.dumps(rest_dicts['avail']['hours_pickup'])
+    rest_dict['pickup_cutoff'] = rest_dicts['avail']['pickup_cutoff']
+
+    # Note that this is in absolute numbers, so we'll have to divide by 100 later on.
+    # This is easy to display though.
+    rest_dict['sales_tax_rate']       = rest_dicts['avail']['sales_tax']
+    rest_dict['delivery_fee_taxable'] = rest_dicts['avail']['delivery_fee_taxable']
+    rest_dict['order_minimum']        = rest_dicts['avail']['order_minimum']['amount']
+    rest_dict['grubhub_url']          = rest_dicts['gh_url']
+
+
+    # I'll have to update modelTools to do this properly too. O well.
+
+    # Second step: populate the menu categories data
+
+
+    # Third step: populate the dish data
+
+
+    # Fourth step: populate the dish to category data.
+
+
+    # TODO: make this error resilient.
+    pass
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', required=True)
+    parser.add_argument('--url', required=False)
     # Values: JSON, DB, ALL
     parser.add_argument('--mode', required=True)
     parser.add_argument('--iofile', default='grubhubs.json')
@@ -339,6 +410,14 @@ def main():
         with open(args.iofile, 'w') as iof:
             json.dump(grub_dicts, iof)
         print("Done")
+    elif args.mode == 'DB':
+        # If this is the case, great!
+        with open(args.iofile, 'r') as iof:
+            grub_dicts = json.load(iof)
+        #print("I got the json, it looks like ")
+        #print(grub_dicts)
+        db_populate_rest(grub_dicts)
+        # Pass this along to the thing that's updating our restaurant/menu...
 
 
 if __name__ == '__main__':
