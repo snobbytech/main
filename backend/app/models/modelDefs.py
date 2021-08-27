@@ -205,6 +205,15 @@ class DishCategory(ModelBase):
     rank = Column(Integer)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'))
 
+    def populate_from_dict(self, props):
+        if 'name' in props:
+            self.name = props['name']
+        if 'rank' in props:
+            self.rank = props['rank']
+        if 'restaurant_id' in props:
+            self.restaurant_id = props['restaurant_id']
+
+
 # Note: when implementing population, I should make sure there arent
 #       double entries here...
 #       Also: I think there are better ways of doing this with
@@ -476,11 +485,13 @@ class Restaurant(ModelBase):
 
     # Returns a 2-tuple (bool, message)
     def validate(self):
-        if (not self.name) or (not self.phone) or not (self.email):
-            return (False, "Crucial info is missing: name {} email {} phone {} must all be filled".format(self.name, self.email, self.phone))
+        # Don't require email right now.
+        if (not self.name) or (not self.phone):
+            return (False, "Crucial info is missing: name {} phone {} must all be filled".format(self.name, self.phone))
 
-        if (not self.delivery_options) or (not self.pos_options):
-            return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
+        # When we go live, this should definitely be handled to some extent.
+#        if (not self.delivery_options) or (not self.pos_options):
+#            return (False, "pos options delivery {} pos_options {} must be filled".format(self.delivery_options, self.pos_options))
 
         if not (self.url_name):
             return (False, "Creating a restaurant: empty url_names are not allowed")

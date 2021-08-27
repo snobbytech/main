@@ -344,7 +344,6 @@ def db_populate_rest(rest_dicts):
     print(rest_dicts.keys())
     rest_dict['name']            = rest_dicts['rest']['name']
     # TODO: let modelTools make sure this doesn't overlap with anything.
-    rest_dict['url_name']         = '-'.join(rest_dicts['rest']['name'].lower().split(' '))
     rest_dict['phone']            = rest_dicts['rest']['phone']
     rest_dict['email']            = ''
     # Not sure what to put here.
@@ -378,11 +377,42 @@ def db_populate_rest(rest_dicts):
     rest_dict['delivery_fee_taxable'] = rest_dicts['avail']['delivery_fee_taxable']
     rest_dict['order_minimum']        = rest_dicts['avail']['order_minimum']['amount']
     rest_dict['grubhub_url']          = rest_dicts['gh_url']
+    the_rest = mt.add_restaurant(rest_dict)
 
+    # THIS IS DONE.
 
-    # I'll have to update modelTools to do this properly too. O well.
+    # I'll have to update modelTools to do this properly too (no duping).
 
     # Second step: populate the menu categories data
+    # dishcategories are just names, ranks, and restaurant_ids.
+    # We just gonna go through the categories and add em.
+    cur_rank = 0
+    dishcats = []
+    for one_cat in rest_dicts['menu']:
+        if not one_cat['available']:
+            continue
+        cat_dict = {}
+        cat_dict['name'] = one_cat['name']
+        cat_dict['restaurant_id'] = the_rest.id
+        cat_dict['rank'] = cur_rank
+
+        # Now add it to the db...
+        cat_obj = mt.add_dish_category(cat_dict)
+
+        # Now, we can go through the category and add each dish.
+        for one_dish in one_cat['dishes']:
+            dish_dict = {}
+            dish_dict['name'] = one_dish['name']
+            dish_dict['restaurant_id'] = the_rest.id
+            dish_dict['price'] = one_dish['price'] / 100
+            # We don't have one for this D:
+            dish_dict['description'] = ''
+            dish_dict['grubhub_id'] = one_dish['id']
+            # OK, add this to the db now...
+            dish_obj = mt.add_dish(dish_dict)
+            print("OK, added {}".format(dish_dict))
+
+        cur_rank += 1
 
 
     # Third step: populate the dish data

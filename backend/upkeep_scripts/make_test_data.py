@@ -291,8 +291,15 @@ def populate_dev():
     pass
 
 
-# Always recreate the tables.
-mt.recreate_tables()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--test_data', default=False, action='store_true')
+    args = parser.parse_args()
 
-# The fateful call...
-populate_dev()
+    mt.recreate_tables()
+    if args.test_data:
+        populate_dev()
+
+
+if __name__ == '__main__':
+    main()
