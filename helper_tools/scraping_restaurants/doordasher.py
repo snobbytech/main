@@ -8,7 +8,7 @@ in our nice little json file.
 Sample usage:
 
 """
-import os, sys, requests, json, argparse
+import os, sys, requests, json, argparse, subprocess
 sys.path.insert(0, os.path.abspath('../../backend'))
 
 os.environ['APP_CONFIG_FILE'] = '../config/dev.py'
@@ -35,7 +35,7 @@ def parse_dish_addon():
         # The addons are in the optionsList
     # dish price.
     cur_rank = 0
-    for one_option_layer in dish_dict['optionsLists']:
+    for one_option_layer in dish_dict['optionLists']:
         cur_options = {}
         cur_options['name'] = one_option_layer['name']
         cur_options['rank'] = cur_rank
@@ -122,30 +122,39 @@ def parse_dd_rest_json():
             # We should get the addon too.
             # TODO: add this dish to the thinger.
             pass
-
-
-    print(rest_dict)
-
     pass
+
+def grab_dish_json(rest_url, rest_id, dish_id):
+    dish_cmd = "cat dd_dish_cmd.sh | sed 's#OUR_DOORDASH_URL#{}#' | sed 's#DD_ITEMID#{}#'| sed 's#DD_STORE_ID#{}#'| bash".format(rest_url, dish_id, rest_id)
+    dish_out = subprocess.getoutput(dish_cmd)
+    dish_dict = json.loads(dish_out)
+    # And... I can return this, yeh.
+    return dish_dict
 
 # This part scrapes and extracts the json from a doordash menu.
-def grab_doordash_main(restaurant_url):
-    restaurant_header = dd_menu_headers.copy()
+def grab_rest_json(restaurant_url):
 
     # Process the url in case there are other args.
-    restaurant_url = restaurant_url.split('?')[0]
-    # OK, now give the referrer stuff.
-    restaurant_header['referer'] = restaurant_url
+    rest_url = restaurant_url.split('?')[0]
+    rest_cmd = "cat dd_rest_cmd.sh | sed 's#OUR_DOORDASH_URL#{}#' | bash".format(rest_url)
+    rest_out = subprocess.getoutput(rest_cmd)
+    rest_dict = json.loads(rest_out)
+    return rest_dict
 
-    # TODO: copy the stuff from the
 
-    pass
 
 def main():
-    #the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
+    the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
+    #x = grab_rest_json(the_url)
+    #print(x)
+    #y = grab_dish_json(the_url, '981727', '200067566')
+    #print(y)
     #grab_doordash_main(the_url)
 
-    rest_obj = parse_dd_rest_json()
+    #rest_obj = parse_dd_rest_json()
+    #addons_obj = parse_dish_addon()
+    #print(addons_obj)
+    print("DONE!")
 
     pass
 
