@@ -58,6 +58,21 @@ handle_blacklist_words = [
     'matcha',
 ]
 
+# Influencers we already processed.
+skip_usernames = [
+    'bae_foodies',
+    'eatmeesheat',
+    'flavorfullsf',
+    'food_adventures21',
+    'gochisousamarissa',
+    'j00diefoodie',
+    'ketobyassociation',
+    'klim_eats',
+    'lvciaeats',
+    'pochacky',
+    'thebobanerd',
+]
+
 # Stuff in the description that probably disqualifies a post...
 desc_blacklist_words = [
     '#homemade',
@@ -221,7 +236,6 @@ def id_promotions(list_of_dicts, outfile):
         writer.writeheader()
         for one_post in kept_posts:
             writer.writerow({'postUrl': one_post['postUrl'], 'location': one_post['location'], 'username': one_post['username'], 'tag': one_post['potential_tag'], 'desc': one_post['inline_desc']})
-    print("Done?")
 
     return
     for one_post in kept_posts:
@@ -242,8 +256,8 @@ def main():
 
     # first
     parser.add_argument('--infile', default='first_lines.csv')
-    # Partner mode: ID the posts that are about partnerships.
-    # FOOD: ID the posts that should show food from restaurants.
+    # PARTNER: ID the posts that are about partnerships.
+    # RESTAURANTs: ID the posts that should show food from restaurants.
     parser.add_argument('--mode', default='PARTNER')
     parser.add_argument('--outfile', default='outfile.csv')
     # TODO: add options so they can select which function to call.
@@ -261,12 +275,15 @@ def main():
                 continue
             if line['postUrl'] in processed_links:
                 continue
+            if line['username'] in skip_usernames:
+                #print("Skipping {} because we already handled them".format(line['username']))
+                continue
+
             processed_links.add(line['postUrl'])
             for col in wanted_cols:
                 reduced_line[col] = line[col]
             #print(reduced_line)
             kept_dicts.append(reduced_line)
-
 
     # Now that we've gone and kept our links, let's pass these over to the promotion spotter...
     if args.mode == 'PARTNER':
