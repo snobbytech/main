@@ -7,6 +7,9 @@ in our nice little json file.
 
 Sample usage:
 
+./dd_to_db.py --mode JSON --url https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/
+
+
 """
 import os, sys, requests, json, argparse, subprocess
 sys.path.insert(0, os.path.abspath('../../backend'))
@@ -54,12 +57,8 @@ def parse_dish_addon():
     return toret
 
 # This part processes the doordash json obj.
-def parse_dd_rest_json():
-    rest_json_path = 'dd_rest_data.json'
-    rest_dict = {}
-    with open(rest_json_path, 'r') as f:
-        rest_dict = json.load(f)
-        rest_dict = rest_dict['data']['storepageFeed']
+def parse_dd_rest_json(rest_dict):
+    rest_dict = rest_dict['data']['storepageFeed']
 
     # I guess, now we can start playing around? Let's start populating the stuff...
     # Then, we need to get the menu items:
@@ -119,6 +118,9 @@ def parse_dd_rest_json():
             dish_dict['name'] = one_dish['name']
             dish_dict['price'] = float(one_dish['displayPrice'].replace('$', ''))
 
+            dish_options_txt = {}
+
+
             # We should get the addon too.
             # TODO: add this dish to the thinger.
             pass
@@ -142,9 +144,26 @@ def grab_rest_json(restaurant_url):
     return rest_dict
 
 
+def scrape_dd():
+    # First step: get the json.
+    #the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
+    #rest_json = grab_rest_json(the_url)
+
+    # TODO: delete this when I make it end to end.
+    rest_json_path = 'dd_rest_data.json'
+    rest_dict = {}
+    with open(rest_json_path, 'r') as f:
+        rest_dict = json.load(f)
+
+    # Now, parse the rest_dict.
+
+
+    pass
+
+
 
 def main():
-    the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
+    #the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
     #x = grab_rest_json(the_url)
     #print(x)
     #y = grab_dish_json(the_url, '981727', '200067566')
@@ -155,6 +174,18 @@ def main():
     #addons_obj = parse_dish_addon()
     #print(addons_obj)
     print("DONE!")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', required=True)
+    # JSON or DB or ALL
+    parser.add_argument('--mode', required=True)
+    parser.add_argument('--iofile', default='dd.json')
+    args = parser.parse_args()
+    # This should update the url too.
+    #dd_dicts = scrape_dd(args.url)
+    #scrape_dd()
+
+
 
     pass
 
