@@ -25,17 +25,12 @@ from app.models.modelDefs import to_public_dict
 import requests
 
 # TODO: read this json, process and add each perdish thing.
-def parse_dish_addon():
+def parse_dish_addon(dish_dict):
     # Given a json with a dish's addons, parse it...
 
     # This is a list of layers of options.
     toret = []
-    dish_json_path = 'dd_dish_data.json'
-    dish_dict = {}
-    with open(dish_json_path, 'r') as f:
-        dish_dict = json.load(f)
-        dish_dict = dish_dict['data']['itemPage']
-        # The addons are in the optionsList
+    dish_dict = dish_dict['data']['itemPage']
     # dish price.
     cur_rank = 0
     for one_option_layer in dish_dict['optionLists']:
@@ -57,17 +52,15 @@ def parse_dish_addon():
     return toret
 
 # This part processes the doordash json obj.
-def parse_dd_rest_json(rest_dict):
+def parse_dd_rest_json(rest_dict, rest_url):
     rest_dict = rest_dict['data']['storepageFeed']
 
     # I guess, now we can start playing around? Let's start populating the stuff...
     # Then, we need to get the menu items:
 
     final_rest_dict = {}
-
-
     # Start parsing the stuff..
-    store_header_ = rest_dict['storeHeader']
+    store_header = rest_dict['storeHeader']
     # used for getting dish info.
     store_id = store_header['id']
 
@@ -96,35 +89,49 @@ def parse_dd_rest_json(rest_dict):
     final_rest_dict['pickup_cutoff'] = ''
 
 
-    final_rest_dict['pickup_estimate_min'] = store_header['status']['pickup'].split('-')[0].strip()
-    final_rest_dict['pickup_estimate_max'] = store_header['status']['pickup'].split('-')[1].strip()
+    final_rest_dict['pickup_estimate_min'] = store_header['status']['pickup']['minutes'].split('-')[0].strip()
+    final_rest_dict['pickup_estimate_max'] = store_header['status']['pickup']['minutes'].split('-')[1].strip()
     # I guess this is just relative to the state...
     final_rest_dict['sales_tax_rate'] = ''
     final_rest_dict['delivery_fee_taxable'] = ''
     # IDK, but maybe we can just set this at $30?
     final_rest_dict['order_minimum'] = 30
     # We gotta know this.
-    final_rest_dict['dd_url'] =''
+    final_rest_dict['dd_url'] = rest_url
 
+    # A list of itemlist, I guess.
+    menu = []
     # Now, let's go through the itemList.
     for one_itemlist in rest_dict['itemLists']:
         itemlist_dict = {}
         itemlist_dict['id'] = one_itemlist['id']
         itemlist_dict['name'] = one_itemlist['name']
         # Now we go through the dishes.
+        dishes = []
         for one_dish in one_itemlist['items']:
             dish_dict = {}
             dish_dict['id'] = one_dish['id']
             dish_dict['name'] = one_dish['name']
             dish_dict['price'] = float(one_dish['displayPrice'].replace('$', ''))
 
-            dish_options_txt = {}
+            dish_options_dict = grab_dish_json(rest_url, store_id, one_dish['id'])
+            # parse it more.
+            smaller_dict_options = parse_dish_addon(dish_options_dict)
+            dish_dict['options'] = smaller_dict_options
+            # Add tqhis to the itemlist...
 
-
+            dishes.append(dish_dict)
+        itemlist_dict['dishes'] = dishes
+        menu.append(itemlist_dict)
             # We should get the addon too.
             # TODO: add this dish to the thinger.
-            pass
-    pass
+
+    # I think this should capture it.
+    toret = {
+        'rest': final_rest_dict,
+        'menu': menu
+        }
+    return toret
 
 def grab_dish_json(rest_url, rest_id, dish_id):
     dish_cmd = "cat dd_dish_cmd.sh | sed 's#OUR_DOORDASH_URL#{}#' | sed 's#DD_ITEMID#{}#'| sed 's#DD_STORE_ID#{}#'| bash".format(rest_url, dish_id, rest_id)
@@ -144,37 +151,15 @@ def grab_rest_json(restaurant_url):
     return rest_dict
 
 
-def scrape_dd():
-    # First step: get the json.
-    #the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
-    #rest_json = grab_rest_json(the_url)
+def scrape_restaurant(rest_url):
+    # First, grab the dd stuff.
+    rest_json = grab_rest_json(rest_url)
+    # Now process it.
 
-    # TODO: delete this when I make it end to end.
-    rest_json_path = 'dd_rest_data.json'
-    rest_dict = {}
-    with open(rest_json_path, 'r') as f:
-        rest_dict = json.load(f)
-
-    # Now, parse the rest_dict.
-
-
-    pass
-
-
+    processed_rest = parse_dd_rest_json(rest_json, rest_url)
+    return processed_rest
 
 def main():
-    #the_url = 'https://www.doordash.com/store/woodhouse-fish-co-san-francisco-981727/'
-    #x = grab_rest_json(the_url)
-    #print(x)
-    #y = grab_dish_json(the_url, '981727', '200067566')
-    #print(y)
-    #grab_doordash_main(the_url)
-
-    #rest_obj = parse_dd_rest_json()
-    #addons_obj = parse_dish_addon()
-    #print(addons_obj)
-    print("DONE!")
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', required=True)
     # JSON or DB or ALL
@@ -182,9 +167,20 @@ def main():
     parser.add_argument('--iofile', default='dd.json')
     args = parser.parse_args()
     # This should update the url too.
-    #dd_dicts = scrape_dd(args.url)
-    #scrape_dd()
 
+    if args.mode == 'JSON':
+        # Grab the stuff
+        dd_dicts = scrape_restaurant(args.url)
+        with open(args.iofile, 'w') as f:
+            json.dump(dd_dicts, f)
+    elif args.mode == 'DB':
+        with open(args.iofile, 'r') as f:
+            dd_dicts = json.load(f)
+        db_populate_rest(dd_dicts)
+    elif args.mode == 'ALL':
+        dd_dicts = scrape_restaurant(args.url)
+        db_populate_rest(dd_dicts)
+    # DONE.
 
 
     pass
