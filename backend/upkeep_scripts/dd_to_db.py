@@ -145,7 +145,11 @@ def grab_rest_json(restaurant_url):
 
     # Process the url in case there are other args.
     rest_url = restaurant_url.split('?')[0]
-    rest_cmd = "cat dd_rest_cmd.sh | sed 's#OUR_DOORDASH_URL#{}#' | bash".format(rest_url)
+    # Also grab the store id...
+    store_id = rest_url.replace('/', '')
+    store_id = store_id.split('-')[-1]
+
+    rest_cmd = "cat dd_rest_cmd.sh | sed 's#OUR_DOORDASH_URL#{}#' | sed 's#OUR_STORE_ID#{}#' | bash".format(rest_url, store_id)
     rest_out = subprocess.getoutput(rest_cmd)
     rest_dict = json.loads(rest_out)
     return rest_dict
@@ -230,6 +234,7 @@ def dd_populate_rest(dd_dicts):
             dish_dict['price'] = one_dish['price']
             # We don't have one for this D:
             dish_dict['description'] = ''
+            dish_dict['num_views'] = 0
             dish_dict['dd_id'] = one_dish['id']
             # OK, add this to the db now...
             dish_obj = mt.add_dish(dish_dict)
@@ -257,7 +262,6 @@ def dd_populate_rest(dd_dicts):
             #print("Mapped the category too.")
         cur_rank += 1
 
-    print("I was here")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -279,7 +283,7 @@ def main():
         dd_populate_rest(dd_dicts)
     elif args.mode == 'ALL':
         dd_dicts = scrape_restaurant(args.url)
-        db_populate_rest(dd_dicts)
+        dd_populate_rest(dd_dicts)
     # DONE.
 
 
