@@ -159,9 +159,109 @@ def scrape_restaurant(rest_url):
     processed_rest = parse_dd_rest_json(rest_json, rest_url)
     return processed_rest
 
+def dd_populate_rest(dd_dicts):
+    # First, populate restaurant data.
+
+    rest_dict = {}
+    rest_dict['name']             = dd_dicts['rest']['name']
+    rest_dict['phone']            = ''
+    # No email.
+    rest_dict['email']            = ''
+    # Not sure what to put here.
+    rest_dict['delivery_options'] = ''
+    # Not sure what to put here. So putting nothing.
+    rest_dict['pos_options']      = ''
+
+    rest_dict['available_pickup'] = dd_dicts['rest']['available_pickup']
+    rest_dict['street_address']   = dd_dicts['rest']['street_address']
+    rest_dict['street_number']    = dd_dicts['rest']['street_number']
+    rest_dict['route']            = ' '.join(dd_dicts['rest']['route'])
+    # This could be messed up later on. Not sure.
+    rest_dict['extra_address_id'] = ''
+    rest_dict['city']             = dd_dicts['rest']['city']
+    # TODO: make this work proper.
+    rest_dict['state']            = 'CA'
+    rest_dict['country']          = dd_dicts['rest']['country']
+    rest_dict['zip_code']         = ''
+    rest_dict['lat']              = dd_dicts['rest']['lat']
+    rest_dict['lon']              = dd_dicts['rest']['lon']
+
+    rest_dict['num_hearts']    = 0
+    rest_dict['category']      = ''
+    # Stringifying a json.
+    rest_dict['hours']         = dd_dicts['rest']['hours']
+    rest_dict['hours_pickup']  = dd_dicts['rest']['hours_pickup']
+    rest_dict['pickup_cutoff'] = 0
+
+    # Note that this is in absolute numbers, so we'll have to divide by 100 later on.
+    # This is easy to display though.
+    # TODO: make a lookup table for cali tax.
+    rest_dict['sales_tax_rate']       = 0.0725
+    # idk.
+    rest_dict['delivery_fee_taxable'] = True
+    rest_dict['order_minimum']        = dd_dicts['rest']['order_minimum']
+    rest_dict['dd_url']               = dd_dicts['rest']['dd_url']
+    the_rest = mt.add_restaurant(rest_dict)
+
+    # THIS IS DONE.
+
+    # I'll have to update modelTools to do this properly too (no duping).
+
+    # Second step: populate the menu categories data
+    # dishcategories are just names, ranks, and restaurant_ids.
+    # We just gonna go through the categories and add em.
+    cur_rank = 0
+    dishcats = []
+    for one_cat in dd_dicts['menu']:
+        cat_dict = {}
+        cat_dict['name'] = one_cat['name']
+        cat_dict['restaurant_id'] = the_rest.id
+        cat_dict['rank'] = cur_rank
+
+        # Now add it to the db...
+        cat_obj = mt.add_dish_category(cat_dict)
+
+        # Now, we can go through the category and add each dish.
+        for one_dish in one_cat['dishes']:
+            dish_dict = {}
+            dish_dict['name'] = one_dish['name']
+            dish_dict['restaurant_id'] = the_rest.id
+            # This price is in units of dollars already.
+            dish_dict['price'] = one_dish['price']
+            # We don't have one for this D:
+            dish_dict['description'] = ''
+            dish_dict['dd_id'] = one_dish['id']
+            # OK, add this to the db now...
+            dish_obj = mt.add_dish(dish_dict)
+            #print("OK, added {}".format(dish_dict))
+
+            # Now, let's add the addons, if there are any.
+            addon_rank = 0
+            for one_addon in one_dish['options']:
+                addon_dict = {}
+                addon_dict['name'] = one_addon['name']
+                addon_dict['dish_id'] = dish_obj.id
+                addon_dict['rank'] = addon_rank
+                addon_dict['min_options'] = one_addon['min_options']
+                addon_dict['max_options'] = one_addon['max_options']
+                # Get the options. But change the price to normal units.
+                addon_dict['options'] = one_addon['options']
+                # OK, now add it to the db also
+                addon_obj = mt.add_dishaddon(addon_dict)
+                # Now, update rank.
+                #print("Added addon...", addon_dict)
+                addon_rank += 1
+
+            # Now, let's do the dish to category map?
+            mt.add_dish_to_category(dish_obj.id, cat_obj.id)
+            #print("Mapped the category too.")
+        cur_rank += 1
+
+    print("I was here")
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', required=True)
+    parser.add_argument('--url')
     # JSON or DB or ALL
     parser.add_argument('--mode', required=True)
     parser.add_argument('--iofile', default='dd.json')
@@ -176,7 +276,7 @@ def main():
     elif args.mode == 'DB':
         with open(args.iofile, 'r') as f:
             dd_dicts = json.load(f)
-        db_populate_rest(dd_dicts)
+        dd_populate_rest(dd_dicts)
     elif args.mode == 'ALL':
         dd_dicts = scrape_restaurant(args.url)
         db_populate_rest(dd_dicts)

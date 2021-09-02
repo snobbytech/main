@@ -261,6 +261,8 @@ class Dish(ModelBase):
 
     # Just in case, going to keep this in here.
     grubhub_id = Column(String)
+    dd_id      = Column(String)
+
     # There will probably be lines here for ubereats and dd.
 
     # Dishes will need some amount of scoring associated with them..
@@ -282,6 +284,8 @@ class Dish(ModelBase):
             self.main_photo = props['main_photo']
         if 'grubhub_id' in props:
             self.grubhub_id = props['grubhub_id']
+        if 'dd_id' in props:
+            self.dd_id = props['dd_id']
 
     def validate(self):
         if (not self.name):
@@ -491,7 +495,7 @@ class Restaurant(ModelBase):
     # Returns a 2-tuple (bool, message)
     def validate(self):
         # Don't require email right now.
-        if (not self.name) or (not self.phone):
+        if (not self.name):
             return (False, "Crucial info is missing: name {} phone {} must all be filled".format(self.name, self.phone))
 
         # When we go live, this should definitely be handled to some extent.
